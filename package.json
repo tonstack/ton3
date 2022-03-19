@@ -1,0 +1,56 @@
+{
+  "name": "@tonstack/tontools",
+  "version": "0.0.1",
+  "description": "TON low-level API tools",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "mocha './test/**/*.ts' --require ts-node/register",
+    "coverage": "nyc --all mocha './test/**/*.ts' --require ts-node/register",
+    "build:doc": "typedoc"
+  },
+  "author": "TonStack",
+  "license": "MIT",
+  "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/chai": "^4.3.0",
+    "@types/crypto-js": "^4.1.1",
+    "@types/mocha": "^9.1.0",
+    "@types/sinon": "^10.0.11",
+    "chai": "^4.3.6",
+    "eslint": "^8.10.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^16.1.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.4",
+    "mocha": "^9.2.1",
+    "nyc": "^15.1.0",
+    "sinon": "^13.0.1",
+    "ts-node": "^10.7.0",
+    "typedoc": "^0.22.13",
+    "typedoc-plugin-markdown": "^3.11.14",
+    "typedoc-plugin-merge-modules": "^3.1.0",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "crypto-js": "4.1.1",
+    "decimal.js": "10.3.1",
+    "tweetnacl": "1.0.3"
+  },
+  "types": "./dist/index.d.ts",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonstack/tontools-js.git"
+  },
+  "keywords": [
+    "ton"
+  ],
+  "bugs": {
+    "url": "https://github.com/tonstack/tontools-js/issues"
+  },
+  "homepage": "https://github.com/tonstack/tontools-js#readme"
+}

@@ -1,0 +1,14 @@
+{
+    "excludeExternals": true,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeInternal": true,
+    "disableSources": true,
+    "sort": ["source-order", "alphabetical"],
+    "readme": "none",
+    "theme": "markdown",
+    "plugin": ["typedoc-plugin-merge-modules", "typedoc-plugin-markdown"],
+    "entryPointStrategy": "expand",
+    "entryPoints": [ "./src"],
+    "out": "./docs"
+}

@@ -7,13 +7,13 @@ import {
 
 type Bit = 0 | 1
 
-const MAX_ARRAY_BITS = 1023
-
 class BitArray {
     private bits: Bit[]
+    private size: number
 
-    constructor () {
+    constructor (size: number = 1023) {
         this.bits = []
+        this.size = size
     }
 
     /**
@@ -33,7 +33,7 @@ class BitArray {
      * @type {number}
      */
     public get remainder(): number {
-        return MAX_ARRAY_BITS - this.length
+        return this.size - this.length
     }
 
     public getBit (pointer: number): Bit {
@@ -191,7 +191,7 @@ class BitArray {
 
     private toFiftHex (): string {
         const isDivisible = this.bits.length % 4 === 0
-        const bits = !isDivisible ? this.clone().topUp(4).toString() : this.clone().toString()
+        const bits = !isDivisible ? this.clone().augment(4).toString() : this.clone().toString()
         const hex = bits.match(/.{4}/g)
             .map(chunk => parseInt(chunk, 2).toString(16))
             .join('')
@@ -215,13 +215,13 @@ class BitArray {
     }
 
     /**
-     * Top up bits with 1 and leading 0 to be divisible by 8 or 4 without remainder
+     * Augment bits with 1 and leading 0 to be divisible by 8 or 4 without remainder
      * Mostly used for {@link BoC} serialization
      *
      * @param {(4 | 8)} [toModulo=8]
      * @return {this}
      */
-    public topUp (toModulo: 4 | 8 = 8): BitArray {
+    public augment (toModulo: 4 | 8 = 8): BitArray {
         const { length } = this.getBits()
         const amount = toModulo - (length % toModulo)
         const bits = [ ...Array(amount) ].map((_el, i) => (i === 0 ? 1 : 0))
@@ -235,16 +235,16 @@ class BitArray {
     }
 
     /**
-     * Remove topped up bits from {@link BitArray.topUp()} operation
+     * Remove augmented bits from {@link BitArray.augment()} operation
      * Mostly used for {@link BoC} deserialization
      * 
      * @return {this}
      */
-    public backUp (): BitArray {
+    public rollback (): BitArray {
         const index = this.bits.slice(-8).reverse().indexOf(1)
 
         if (index === -1) {
-            throw new Error('Incorrect TopUpped bits')
+            throw new Error('Incorrectly augmented bits')
         }
 
         this.bits.splice(-(index + 1))

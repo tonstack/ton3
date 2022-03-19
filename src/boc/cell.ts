@@ -82,8 +82,8 @@ class Cell {
     hash (): string {
         const refsDescriptor = this.refsDescriptor()
         const bitsDescriptor = this.bitsDescriptor()
-        const toppedUpBits = this.bits.clone().topUp().getBits()
-        let repr = [ ...refsDescriptor, ...bitsDescriptor, ...toppedUpBits ]
+        const augmentedBits = this.bits.clone().augment().getBits()
+        let repr = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
 
         this.refs.forEach((ref) => {
             const depth = ref.maxDepth()

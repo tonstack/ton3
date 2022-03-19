@@ -205,14 +205,14 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
     }
 
     const dataByteArray = remainder.splice(0, dataByteSize)
-    const isToppedUp = bitsDescriptor % 2 !== 0
+    const isAugmented = bitsDescriptor % 2 !== 0
     const cell = new Cell()
 
     cell.isExotic = !!isExotic
     cell.bits.writeBytes(dataByteArray)
 
-    if (isToppedUp) {
-        cell.bits.backUp()
+    if (isAugmented) {
+        cell.bits.augment()
     }
 
     const refIndexes = [ ...Array(refNum) ].reduce<number[]>((acc) => {
@@ -302,8 +302,8 @@ function* leftChildList (root: Cell): IterableIterator<Cell> {
 const serializeCell = (cell: Cell, sorted: Cell[]): Bit[] => {
     const refsDescriptor = cell.refsDescriptor()
     const bitsDescriptor = cell.bitsDescriptor()
-    const toppedUpBits = cell.bits.clone().topUp().getBits()
-    let repr = [ ...refsDescriptor, ...bitsDescriptor, ...toppedUpBits ]
+    const augmentedBits = cell.bits.clone().augment().getBits()
+    let repr = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
 
     cell.refs.forEach((ref) => {
         const refIndex = sorted.findIndex(item => item === ref)
@@ -337,7 +337,7 @@ const serialize = (root: Cell, options: SerializationOptions = {}): Uint8Array =
     const full_size = cells_bits.length / 8
     const offset_bits = full_size.toString(2).length
     const offset_bytes = Math.max(Math.ceil(offset_bits / 8), 1)
-    const header = new BitArray()
+    const header = new BitArray((1023 + 32 * 4 + 32 * 3) * cells_list.length)
 
     header.writeBytes(REACH_BOC_MAGIC_PREFIX)
         .writeBit(Number(has_idx))
@@ -358,7 +358,7 @@ const serialize = (root: Cell, options: SerializationOptions = {}): Uint8Array =
 
     header.writeBits(cells_bits)
 
-    const boc = header.topUp()
+    const boc = header.augment()
     const result = hash_crc32
         ? boc.writeBytes(crc32cBytesLe(boc.getBytes()))
         : boc

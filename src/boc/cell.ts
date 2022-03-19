@@ -36,11 +36,15 @@ class Cell {
     }
 
     private getMaxDepth (): number {
-        return this.refs.reduce((acc, cell) => {
+        const maxDepth = this.refs.reduce((acc, cell) => {
             const depth = cell.getMaxDepth()
 
-            return depth > acc ? (depth + 1) : acc
+            return depth > acc ? depth : acc
         }, 0)
+
+        return this.refs.length
+            ? maxDepth + 1
+            : maxDepth
     }
 
     concat (cell: Cell): void {

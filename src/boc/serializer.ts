@@ -212,7 +212,7 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
     cell.bits.writeBytes(dataByteArray)
 
     if (isAugmented) {
-        cell.bits.augment()
+        cell.bits.rollback()
     }
 
     const refIndexes = [ ...Array(refNum) ].reduce<number[]>((acc) => {
@@ -262,51 +262,73 @@ const deserialize = (data: Uint8Array): Cell[] => {
             })
         })
 
-    return root_list.reduce<Cell[]>((acc, refIndex) => acc.concat(pointers[refIndex].cell), [])
+    return root_list.reduce((acc, refIndex) => acc.concat([ pointers[refIndex].cell ]), [] as Cell[])
 }
 
-function* leftChildList (root: Cell): IterableIterator<Cell> {
-    const nodes: CellNode[] = [ { cell: root, children: root.refs.length, scanned: 0 } ]
-    const buffer: Cell[] = [ root ]
-    const scan = (node: CellNode): void => {
-        // eslint-disable-next-line no-plusplus, no-param-reassign
-        const ref = node.cell.refs[node.scanned++]
+const depthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, number> } => {
+    // TODO: fix multiple root cells serialization
 
-        nodes.push({ cell: ref, children: ref.refs.length, scanned: 0 })
-        buffer.push(ref)
+    const hashmap = new Map<string, number>()
+    const nodes: CellNode[] = [ { cell: root, children: root.refs.length, scanned: 0 } ]
+    const stack: { cell: Cell, hash: string }[] = [ { cell: root, hash: root.hash() } ]
+
+    hashmap.set(stack[0].hash, 0)
+
+    // Reorder stack if duplicate found
+    const move = (index: number): void => {
+        stack.push(stack.splice(index, 1)[0])
+        stack.slice(index).forEach((el, i) => hashmap.set(el.hash, index + i))
     }
 
-    while (buffer.length) {
-        yield buffer.pop() as Cell
+    // Add tree node to ordered stack
+    const add = (node: CellNode): void => {
+        // eslint-disable-next-line no-plusplus, no-param-reassign
+        const ref = node.cell.refs[node.scanned++]
+        const hash = ref.hash()
+        const index = hashmap.get(hash)
 
-        if (nodes.length) {
-            let current = nodes[nodes.length - 1]
+        if (index !== undefined) {
+            return move(index)
+        }
 
-            if (current.children !== current.scanned) {
-                scan(current)
-            } else {
-                while (nodes.length && current && current.children === current.scanned) {
-                    nodes.pop()
+        hashmap.set(hash, stack.length)
+        nodes.push({ cell: ref, children: ref.refs.length, scanned: 0 })
+        stack.push({ cell: ref, hash })
+    }
 
-                    current = nodes[nodes.length - 1]
-                }
+    // Loop throug tree and make detph-first search till last node
+    while (nodes.length) {
+        let current = nodes[nodes.length - 1]
 
-                if (current !== undefined) {
-                    scan(current)
-                }
+        if (current.children !== current.scanned) {
+            add(current)
+        } else {
+            while (nodes.length && current && current.children === current.scanned) {
+                nodes.pop()
+
+                current = nodes[nodes.length - 1]
+            }
+
+            if (current !== undefined) {
+                add(current)
             }
         }
     }
+
+    return {
+        cells: stack.map(el => el.cell),
+        hashmap
+    }
 }
 
-const serializeCell = (cell: Cell, sorted: Cell[]): Bit[] => {
+const serializeCell = (cell: Cell, hashmap: Map<string, number>): Bit[] => {
     const refsDescriptor = cell.refsDescriptor()
     const bitsDescriptor = cell.bitsDescriptor()
     const augmentedBits = cell.bits.clone().augment().getBits()
     let repr = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
 
     cell.refs.forEach((ref) => {
-        const refIndex = sorted.findIndex(item => item === ref)
+        const refIndex = hashmap.get(ref.hash())
         const bits = hexToBits(uintToHex(refIndex))
 
         repr = repr.concat(bits)
@@ -316,17 +338,13 @@ const serializeCell = (cell: Cell, sorted: Cell[]): Bit[] => {
 }
 
 const serialize = (root: Cell, options: SerializationOptions = {}): Uint8Array => {
-    // TODO: fix multiple root cells serialization
-
     const { has_idx = false, hash_crc32 = true, has_cache_bits = false, flags = 0 } = options
-    const cells_list = [ ...leftChildList(root) ]
+    const { cells: cells_list, hashmap } = depthFirstSort(root)
     const cells_num = cells_list.length
-
-    // Minimal number of bits to represent reference (unused?)
     const size = cells_num.toString(2).length
     const size_bytes = Math.min(Math.ceil(size / 8), 1)
     const [ cells_bits, size_index ] = cells_list.reduce<[ Bit[], number[] ]>((acc, cell) => {
-        const bits = serializeCell(cell, cells_list)
+        const bits = serializeCell(cell, hashmap)
 
         acc[0] = acc[0].concat(bits)
         acc[1].push(bits.length / 8)

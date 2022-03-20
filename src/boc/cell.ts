@@ -61,15 +61,14 @@ class Cell {
     }
 
     refsDescriptor (): Bit[] {
-        const refs = this.refs.length + Number(this.isExotic) + this.getMaxLevel() * 4
+        const refs = this.refs.length + (Number(this.isExotic) * 8) + (this.getMaxLevel() * 32)
         const bits = refs.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
     }
 
     bitsDescriptor (): Bit[] {
-        const { length } = this.bits.getBits()
-        const cap = Math.ceil(length / 8) + Math.floor(length / 8)
+        const cap = Math.ceil(this.bits.length / 8) + Math.floor(this.bits.length / 8)
         const bits = cap.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
@@ -79,26 +78,31 @@ class Cell {
         return new Slice(this)
     }
 
-    hash (): string {
+    getRepresentation (): Bit[] {
         const refsDescriptor = this.refsDescriptor()
         const bitsDescriptor = this.bitsDescriptor()
         const augmentedBits = this.bits.clone().augment().getBits()
-        let repr = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
+        let representation = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
 
         this.refs.forEach((ref) => {
             const depth = ref.maxDepth()
 
-            repr = [ ...repr, ...depth ]
+            representation = [ ...representation, ...depth ]
         })
 
         this.refs.forEach((ref) => {
             const hash = ref.hash()
             const bits = hexToBits(hash)
 
-            repr = [ ...repr, ...bits ]
+            representation = [ ...representation, ...bits ]
         })
 
-        const hex = bitsToHex(repr)
+        return representation
+    }
+
+    hash (): string {
+        const representation = this.getRepresentation()
+        const hex = bitsToHex(representation)
         const hash = sha256(encoderHex.parse(hex))
 
         return hash.toString()

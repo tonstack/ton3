@@ -167,7 +167,7 @@ class BitArray {
     }
 
     public append (data: BitArray): BitArray {
-        this.writeBits(data.bits)
+        this.writeBits(data.getBits())
 
         return this
     }
@@ -196,7 +196,7 @@ class BitArray {
             .map(chunk => parseInt(chunk, 2).toString(16))
             .join('')
 
-        return hex.toUpperCase() + isDivisible ? '_' : ''
+        return `${hex.toUpperCase()}${isDivisible ? '_' : ''}`
     }
 
     public fromFiftHex (fift: string): BitArray {
@@ -241,7 +241,7 @@ class BitArray {
      * @return {this}
      */
     public rollback (): BitArray {
-        const index = this.bits.slice(-8).reverse().indexOf(1)
+        const index = this.bits.slice(-7).reverse().indexOf(1)
 
         if (index === -1) {
             throw new Error('Incorrectly augmented bits')

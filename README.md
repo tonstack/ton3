@@ -5,7 +5,7 @@
 
 
 Tontools-js is a javascript package inspired by [tonweb](https://github.com/toncenter/tonweb) to work with TON blockchain.\
-Visit [documentation](https://github.com/tonstack/tontools-js/docs) to see API reference.
+Visit [documentation](./docs/) to see API reference.
 > :warning: Work in progress, API can (and most likely will) be changed! This is not production ready version yet.
 
 ## How to install

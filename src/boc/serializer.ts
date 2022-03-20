@@ -274,7 +274,7 @@ const depthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, numbe
 
     hashmap.set(stack[0].hash, 0)
 
-    // Reorder stack if duplicate found
+    // Reorder stack and hashmap if duplicate found
     const move = (index: number): void => {
         stack.push(stack.splice(index, 1)[0])
         stack.slice(index).forEach((el, i) => hashmap.set(el.hash, index + i))
@@ -296,7 +296,7 @@ const depthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, numbe
         stack.push({ cell: ref, hash })
     }
 
-    // Loop throug tree and make detph-first search till last node
+    // Loop through multi-tree and make depth-first search till last node
     while (nodes.length) {
         let current = nodes[nodes.length - 1]
 
@@ -313,6 +313,52 @@ const depthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, numbe
                 add(current)
             }
         }
+    }
+
+    return {
+        cells: stack.map(el => el.cell),
+        hashmap
+    }
+}
+
+const breadthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, number> } => {
+    // TODO: fix multiple root cells serialization
+
+    const hashmap = new Map<string, number>()
+    const nodes: Cell[] = [ root ]
+    const stack: { cell: Cell, hash: string }[] = [ { cell: root, hash: root.hash() } ]
+
+    hashmap.set(stack[0].hash, 0)
+
+    // Reorder stack and hashmap if duplicate found
+    const move = (index: number): void => {
+        stack.push(stack.splice(index, 1)[0])
+        stack.slice(index).forEach((el, i) => hashmap.set(el.hash, index + i))
+    }
+
+    // Add tree node to ordered stack
+    const add = (node: Cell): void => {
+        const hash = node.hash()
+        const index = hashmap.get(hash)
+
+        if (index !== undefined) {
+            return move(index)
+        }
+
+        hashmap.set(hash, stack.length)
+        nodes.push(node)
+        stack.push({ cell: node, hash })
+    }
+
+    // Loop through multi-tree and make breadth-first search till last node
+    while (nodes.length) {
+        const length = nodes.length
+
+        nodes.forEach((node) => {
+            node.refs.forEach((ref) => add(ref))
+        })
+
+        nodes.splice(0, length)
     }
 
     return {

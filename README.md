@@ -15,7 +15,7 @@ npm i @tonstack/tontools
 
 ## How to use
 ```typescript
-import { BOC, Builder, Slice } from '@tonstack/tontools'
+import { BOC, Builder } from '@tonstack/tontools'
 
 const text = 'Hello, World!'
 const cell = new Builder()

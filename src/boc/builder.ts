@@ -34,8 +34,8 @@ class Builder {
         }
     }
 
-    private storeNumber (value: bigint, length: number): this {
-        const bits = [ ...Array(length) ]
+    private storeNumber (value: bigint, size: number): this {
+        const bits = [ ...Array(size) ]
             .map((_el, i) => Number(((value >> BigInt(i)) & 1n) === 1n) as Bit)
             .reverse()
 
@@ -134,7 +134,7 @@ class Builder {
      */
     public storeBit (bit: Bit | number): this {
         if (bit !== 0 && bit !== 1) {
-            throw new Error('Builder: can\'t store bit, because it\'s value doesn\'t equals 0 nor 1.')
+            throw new Error('Builder: can\'t store bit, because it\'s type not Number or value doesn\'t equals 0 nor 1.')
         }
 
         this.checkBitsOverflow(1)
@@ -161,18 +161,18 @@ class Builder {
      * Store an integer in instance.
      * 
      * @param {(number | bigint)} value - Int.
-     * @param {number} length - Size in bits of allocated space for value.
+     * @param {number} size - Size in bits of allocated space for value.
      * @return {this}
      */
-    public storeInt (value: number | bigint, length: number): this {
+    public storeInt (value: number | bigint, size: number): this {
         const int = BigInt(value)
-        const intBits = 1n << (BigInt(length) - 1n)
+        const intBits = 1n << (BigInt(size) - 1n)
 
         if (int < -intBits || int >= intBits) {
             throw new Error('Builder: can\'t store an Int, because its value allocates more space than provided.')
         }
 
-        this.storeNumber(int, length)
+        this.storeNumber(int, size)
 
         return this
     }
@@ -181,17 +181,17 @@ class Builder {
      * Store an unsigned integer in instance.
      * 
      * @param {(number | bigint)} value - UInt.
-     * @param {number} length - Size in bits of allocated space for value.
+     * @param {number} size - Size in bits of allocated space for value.
      * @return {this}
      */
-    public storeUint (value: number | bigint, length: number): this {
+    public storeUint (value: number | bigint, size: number): this {
         const uint = BigInt(value)
 
-        if (uint < 0 || uint >= (1n << BigInt(length))) {
+        if (uint < 0 || uint >= (1n << BigInt(size))) {
             throw new Error('Builder: can\'t store an UInt, because its value allocates more space than provided.')
         }
 
-        this.storeNumber(uint, length)
+        this.storeNumber(uint, size)
 
         return this
     }
@@ -286,7 +286,9 @@ class Builder {
     public clone (): Builder {
         const data = new Builder(this._size)
 
-        data.storeBits(Array.from(this._bits))
+        // Use getters to get copy of arrays
+        data.storeBits(this.bits)
+        this.refs.forEach(ref => data.storeRef(ref))
 
         return data
     }

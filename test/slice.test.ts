@@ -1,70 +1,101 @@
-import sinon from 'sinon'
-import { expect, should } from 'chai'
-import { BoC } from '../src/boc'
-import { Cell } from '../src/boc/cell'
+import { expect } from 'chai'
+import { Builder } from '../src/boc/builder'
 import { Slice } from '../src/boc/slice'
 import { stringToBytes } from '../src/utils/helpers'
-import { Bit } from '../src/boc/bit-array'
 import { Address } from '../src/address'
 import { Coins } from '../src/coins'
 
 describe('Slice', () => {
-    let cell: Cell
+    let builder: Builder
 
     beforeEach(() => {
-        cell = new Cell()
+        builder = new Builder()
     })
 
     describe('#constructor()', () => {
         it('should create Slice from Cell', () => {
-            const result = new Slice(cell)
+            const cell = builder.cell()
+            const result = cell.parse()
 
             expect(result).to.be.instanceOf(Slice)
         })
     })
 
+    describe('#bits', () => {
+        it('should get Slice bits', () => {
+            const slice = builder.cell().parse()
+            const result = slice.bits
+
+            expect(result).to.eql([])
+        })
+
+        it('should throw error from changing attempt', () => {
+            const slice = builder.cell().parse()
+            // @ts-ignore
+            const result = () => { slice.bits = [ 0, 1 ] }
+
+            expect(result).to.throw('Cannot set property bits of #<Slice> which has only a getter')
+        })
+    })
+
+    describe('#refs', () => {
+        it('should get Slice refs', () => {
+            const slice = builder.cell().parse()
+            const result = slice.refs
+
+            expect(result).to.eql([])
+        })
+
+        it('should throw error from changing attempt', () => {
+            const slice = builder.cell().parse()
+            // @ts-ignore
+            const result = () => { slice.refs = [] }
+
+            expect(result).to.throw('Cannot set property refs of #<Slice> which has only a getter')
+        })
+    })
+
     describe('#skip()', () => {
         it('should skip bits', () => {
-            cell.bits.writeBits([ 0, 0, 1, 1 ])
+            builder.storeBits([ 0, 0, 1, 1 ])
 
-            const slice = new Slice(cell)
-            const result = slice.skip(2).readBits(2)
+            const slice = builder.cell().parse()
+            const result = slice.skip(2).loadBits(2)
 
             expect(result).to.eql([ 1, 1 ])
         })
 
         it('should throw error on overflow', () => {
-            cell.bits.writeBits([ 0, 0, 1, 1 ])
+            builder.storeBits([ 0, 0, 1, 1 ])
 
-            const slice = new Slice(cell)
+            const slice = builder.cell().parse()
             const result = () => slice.skip(6)
 
-            expect(result).to.throw('Slice skip overflow')
+            expect(result).to.throw('Slice: skip bits overflow.')
         })
     })
 
-    describe('#readRef()', () => {
-        it('should read ref', () => {
-            const ref = new Cell()
+    describe('#loadRef()', () => {
+        it('should load ref', () => {
+            const ref = new Builder().cell()
 
-            cell.refs.push(ref)
+            builder.storeRef(ref)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readRef()
-            // @ts-ignore
+            const slice = builder.cell().parse()
+            const result1 = slice.loadRef()
             const result2 = slice.refs.length
 
             expect(result1).to.eq(ref)
             expect(result2).to.eq(0)
         })
 
-        it('should read ref without splicing refs', () => {
-            const ref = new Cell()
+        it('should load ref without splicing refs', () => {
+            const ref = new Builder().cell()
 
-            cell.refs.push(ref)
+            builder.storeRef(ref)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readRef(false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadRef(false)
             // @ts-ignore
             const result2 = slice.refs.length
 
@@ -73,19 +104,19 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readRef()
+            const slice = builder.cell().parse()
+            const result = () => slice.loadRef()
 
-            expect(result).to.throw('Slice refs overflow')
+            expect(result).to.throw('Slice: refs overflow.')
         })
     })
 
-    describe('#readBit()', () => {
-        it('should read bit', () => {
-            cell.bits.writeBit(1)
+    describe('#loadBit()', () => {
+        it('should load bit', () => {
+            builder.storeBit(1)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readBit()
+            const slice = builder.cell().parse()
+            const result1 = slice.loadBit()
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -93,11 +124,11 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read bit without splicing bits', () => {
-            cell.bits.writeBit(1)
+        it('should load bit without splicing bits', () => {
+            builder.storeBit(1)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readBit(false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadBit(false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -106,19 +137,19 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readBit()
+            const slice = builder.cell().parse()
+            const result = () => slice.loadBit()
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readBits()', () => {
-        it('should read bits', () => {
-            cell.bits.writeBits([ 0, 1 ])
+    describe('#loadBits()', () => {
+        it('should load bits', () => {
+            builder.storeBits([ 0, 1 ])
 
-            const slice = new Slice(cell)
-            const result1 = slice.readBits(2)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadBits(2)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -126,11 +157,11 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read bits without splicing bits', () => {
-            cell.bits.writeBits([ 0, 1 ])
+        it('should load bits without splicing bits', () => {
+            builder.storeBits([ 0, 1 ])
 
-            const slice = new Slice(cell)
-            const result1 = slice.readBits(2, false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadBits(2, false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -139,21 +170,21 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readBits(2)
+            const slice = builder.cell().parse()
+            const result = () => slice.loadBits(2)
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readInt()', () => {
-        it('should read negative int', () => {
+    describe('#loadInt()', () => {
+        it('should load negative int', () => {
             const int = -14
 
-            cell.bits.writeInt(int, 15)
+            builder.storeInt(int, 15)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readInt(15)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadInt(15)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -161,13 +192,13 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read positive int', () => {
+        it('should load positive int', () => {
             const int = 14
 
-            cell.bits.writeInt(int, 15)
+            builder.storeInt(int, 15)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readInt(15)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadInt(15)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -175,13 +206,13 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read int without splicing bits', () => {
+        it('should load int without splicing bits', () => {
             const int = -14
 
-            cell.bits.writeInt(int, 15)
+            builder.storeInt(int, 15)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readInt(15, false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadInt(15, false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -190,21 +221,21 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readInt(15)
+            const slice = builder.cell().parse()
+            const result = () => slice.loadInt(15)
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readUint()', () => {
-        it('should read uint', () => {
+    describe('#loadUint()', () => {
+        it('should load uint', () => {
             const uint = 14
 
-            cell.bits.writeUint(uint, 9)
+            builder.storeUint(uint, 9)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readUint(9)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadUint(9)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -212,13 +243,13 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read uint without splicing bits', () => {
+        it('should load uint without splicing bits', () => {
             const uint = 14
 
-            cell.bits.writeUint(uint, 9)
+            builder.storeUint(uint, 9)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readUint(9, false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadUint(9, false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -227,21 +258,21 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readUint(9)
+            const slice = builder.cell().parse()
+            const result = () => slice.loadUint(9)
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readBytes()', () => {
-        it('should read bytes', () => {
+    describe('#loadBytes()', () => {
+        it('should load bytes', () => {
             const bytes = new Uint8Array([ 255, 11, 12 ])
 
-            cell.bits.writeBytes(bytes)
+            builder.storeBytes(bytes)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readBytes(bytes.byteLength * 8)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadBytes(bytes.byteLength * 8)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -249,13 +280,13 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read bytes without splicing bits', () => {
+        it('should load bytes without splicing bits', () => {
             const bytes = new Uint8Array([ 255, 11, 12 ])
 
-            cell.bits.writeBytes(bytes)
+            builder.storeBytes(bytes)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readBytes(bytes.byteLength * 8, false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadBytes(bytes.byteLength * 8, false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -264,21 +295,21 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readBytes(8)
+            const slice = builder.cell().parse()
+            const result = () => slice.loadBytes(8)
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readString()', () => {
-        it('should read string', () => {
+    describe('#loadString()', () => {
+        it('should load string', () => {
             const string = 'Привет, мир!'
 
-            cell.bits.writeString(string)
+            builder.storeString(string)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readString()
+            const slice = builder.cell().parse()
+            const result1 = slice.loadString()
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -286,14 +317,14 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read string with size', () => {
+        it('should load string with size', () => {
             const string = 'Привет, мир!'
             const size = stringToBytes(string).length * 8
 
-            cell.bits.writeString(string)
+            builder.storeString(string)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readString(size)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadString(size)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -301,14 +332,14 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read string without splicing bits', () => {
+        it('should load string without splicing bits', () => {
             const string = 'Привет, мир!'
             const size = stringToBytes(string).length * 8
 
-            cell.bits.writeString(string)
+            builder.storeString(string)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readString(size, false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadString(size, false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -317,22 +348,22 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readString()
+            const slice = builder.cell().parse()
+            const result = () => slice.loadString()
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readAddress()', () => {
-        it('should read Address', () => {
+    describe('#loadAddress()', () => {
+        it('should load Address', () => {
             const raw = '0:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
             const address = new Address(raw)
 
-            cell.bits.writeAddress(address)
+            builder.storeAddress(address)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readAddress()
+            const slice = builder.cell().parse()
+            const result1 = slice.loadAddress()
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -340,14 +371,14 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read Address without splicing bits', () => {
+        it('should load Address without splicing bits', () => {
             const raw = '0:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
             const address = new Address(raw)
 
-            cell.bits.writeAddress(address)
+            builder.storeAddress(address)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readAddress(false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadAddress(false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -355,11 +386,23 @@ describe('Slice', () => {
             expect(result2).to.eq(2 + 1 + 8 + 256)
         })
 
-        it('should read null Address without splicing bits', () => {
-            cell.bits.writeAddress(Address.NULL)
+        it('should load null Address with splicing bits', () => {
+            builder.storeAddress(Address.NULL)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readAddress(false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadAddress()
+            // @ts-ignore
+            const result2 = slice.bits.length
+
+            expect(result1).to.eq(Address.NULL)
+            expect(result2).to.eq(0)
+        })
+
+        it('should load null Address without splicing bits', () => {
+            builder.storeAddress(Address.NULL)
+
+            const slice = builder.cell().parse()
+            const result1 = slice.loadAddress(false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -368,30 +411,30 @@ describe('Slice', () => {
         })
 
         it('should throw error on incorrect Address flags', () => {
-            cell.bits.writeBits([ 1, 1 ])
+            builder.storeBits([ 1, 1 ])
 
-            const slice = new Slice(cell)
-            const result = () => slice.readAddress()
+            const slice = builder.cell().parse()
+            const result = () => slice.loadAddress()
 
-            expect(result).to.throw('Bad address flag bits')
+            expect(result).to.throw('Slice: bad address flag bits')
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readAddress()
+            const slice = builder.cell().parse()
+            const result = () => slice.loadAddress()
 
-            expect(result).to.throw('Slice bits overflow')
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 
-    describe('#readCoins()', () => {
-        it('should read Coins', () => {
+    describe('#loadCoins()', () => {
+        it('should load Coins', () => {
             const coins = new Coins('100.5')
 
-            cell.bits.writeCoins(coins)
+            builder.storeCoins(coins)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readCoins()
+            const slice = builder.cell().parse()
+            const result1 = slice.loadCoins()
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -399,14 +442,14 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read Coins without splicing bits', () => {
+        it('should load Coins without splicing bits', () => {
             const coins = new Coins('100.5')
             const size = BigInt(coins.toNano()).toString(16).length
 
-            cell.bits.writeCoins(coins)
+            builder.storeCoins(coins)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readCoins(false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadCoins(false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -414,13 +457,13 @@ describe('Slice', () => {
             expect(result2).to.eq(4 + (size * 4))
         })
 
-        it('should read zero Coins', () => {
+        it('should load zero Coins', () => {
             const coins = new Coins('0')
 
-            cell.bits.writeCoins(coins)
+            builder.storeCoins(coins)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readCoins()
+            const slice = builder.cell().parse()
+            const result1 = slice.loadCoins()
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -428,13 +471,13 @@ describe('Slice', () => {
             expect(result2).to.eq(0)
         })
 
-        it('should read zero Coins without splicing bits', () => {
+        it('should load zero Coins without splicing bits', () => {
             const coins = new Coins('0')
 
-            cell.bits.writeCoins(coins)
+            builder.storeCoins(coins)
 
-            const slice = new Slice(cell)
-            const result1 = slice.readCoins(false)
+            const slice = builder.cell().parse()
+            const result1 = slice.loadCoins(false)
             // @ts-ignore
             const result2 = slice.bits.length
 
@@ -443,18 +486,10 @@ describe('Slice', () => {
         })
 
         it('should throw error on overflow', () => {
-            const slice = new Slice(cell)
-            const result = () => slice.readCoins()
+            const slice = builder.cell().parse()
+            const result = () => slice.loadCoins()
 
-            expect(result).to.throw('Slice bits overflow')
-        })
-    })
-
-    describe('#from()', () => {
-        it('should create Slice from Cell', () => {
-            const result = Slice.from(cell)
-
-            expect(result).to.be.instanceOf(Slice)
+            expect(result).to.throw('Slice: bits overflow.')
         })
     })
 })

@@ -95,7 +95,7 @@ class Address {
         }
 
         if (result === null) {
-            throw new Error('Can\'t parse address. Unknown type')
+            throw new Error('Address: can\'t parse address. Unknown type.')
         }
 
         this._workchain = result.workchain
@@ -122,7 +122,7 @@ class Address {
 
     public set workchain (value: number) {
         if (typeof value !== 'number' || value < -128 || value >= 128) {
-            throw new Error('Address: workchain must be int8')
+            throw new Error('Address: workchain must be int8.')
         }
 
         this._workchain = value
@@ -130,7 +130,7 @@ class Address {
 
     public set bounceable (value: boolean) {
         if (typeof value !== 'boolean') {
-            throw new Error('Address: bounceable flag must be a boolean')
+            throw new Error('Address: bounceable flag must be a boolean.')
         }
 
         this._bounceable = value
@@ -138,7 +138,7 @@ class Address {
 
     public set testOnly (value: boolean) {
         if (typeof value !== 'boolean') {
-            throw new Error('Address: testOnly flag must be a boolean')
+            throw new Error('Address: testOnly flag must be a boolean.')
         }
 
         this._testOnly = value
@@ -168,7 +168,7 @@ class Address {
         const crc = crc16BytesBe(address)
 
         if (!bytesCompare(crc, hashsum)) {
-            throw new Error('Can\'t parse address. Wrong hashsum.')
+            throw new Error('Address: can\'t parse address. Wrong hashsum.')
         }
 
         const tag = address.shift()
@@ -237,17 +237,17 @@ class Address {
 
     private static decodeTag (tag: number): AddressTag {
         const testOnly = (tag & FLAG_TEST_ONLY) !== 0
-    
+
         if (testOnly) {
             tag = tag ^ FLAG_TEST_ONLY
         }
-    
+
         if (![ FLAG_BOUNCEABLE, FLAG_NON_BOUNCEABLE ].includes(tag)) {
-            throw new Error('Bad address tag')
+            throw new Error('Address: bad address tag.')
         }
-    
+
         const bounceable = tag === FLAG_BOUNCEABLE
-    
+
         return {
             bounceable,
             testOnly

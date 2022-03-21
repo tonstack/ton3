@@ -61,11 +61,11 @@ class Slice {
      * @return {this}
      */
     public skip (size: number): Slice {
-        if (this.bits.length < size) {
-            throw new Error('Slice skip overflow')
+        if (this._bits.length < size) {
+            throw new Error('Slice: skip bits overflow.')
         }
 
-        this.bits.splice(0, size)
+        this._bits.splice(0, size)
 
         return this
     }
@@ -92,11 +92,11 @@ class Slice {
      * @return {Cell}
      */
     public loadRef (splice: boolean = true): Cell {
-        if (!this.refs.length) {
-            throw new Error('Slice refs overflow')
+        if (!this._refs.length) {
+            throw new Error('Slice: refs overflow.')
         }
 
-        return splice ? this.refs.shift() : this.refs[0]
+        return splice ? this._refs.shift() : this._refs[0]
     }
 
     /**
@@ -120,11 +120,11 @@ class Slice {
      * @return {Bit[]}
      */
     public loadBit (splice: boolean = true): Bit {
-        if (!this.bits.length) {
-            throw new Error('Slice bits overflow')
+        if (!this._bits.length) {
+            throw new Error('Slice: bits overflow.')
         }
 
-        return splice ? this.bits.shift() : this.bits[0]
+        return splice ? this._bits.shift() : this._bits[0]
     }
 
     /**
@@ -149,11 +149,11 @@ class Slice {
      * @return {Bit[]}
      */
     public loadBits (size: number, splice: boolean = true): Bit[] {
-        if (size <= 0 || this.bits.length < size) {
-            throw new Error('Slice bits overflow')
+        if (size <= 0 || this._bits.length < size) {
+            throw new Error('Slice: bits overflow.')
         }
 
-        return splice ? this.bits.splice(0, size) : this.bits.slice(0, size)
+        return splice ? this._bits.splice(0, size) : this._bits.slice(0, size)
     }
 
     /**
@@ -260,7 +260,7 @@ class Slice {
      */
     public loadString (size: number = null, splice: boolean = true): string {
         const bytes = size === null
-            ? this.loadBytes(this.bits.length, splice)
+            ? this.loadBytes(this._bits.length, splice)
             : this.loadBytes(size, splice)
 
         return bytesToString(bytes)
@@ -314,7 +314,7 @@ class Slice {
                 : new Address(bytes)
         }
 
-        throw new Error('Bad address flag bits')
+        throw new Error('Slice: bad address flag bits.')
     }
 
     /**

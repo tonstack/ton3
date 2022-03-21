@@ -40,7 +40,13 @@ const bitsToHex = (bits: Bit[]): string => {
     return hex.join('')
 }
 
-const bitsToBytes = (bits: Bit[]): Uint8Array => hexToBytes(bitsToHex(bits))
+const bitsToBytes = (bits: Bit[]): Uint8Array => {
+    if (bits.length === 0) {
+        return new Uint8Array()
+    }
+
+    return hexToBytes(bitsToHex(bits))
+}
 
 const bytesToUint = (bytes: Uint8Array | number[]): number => {
     /* eslint-disable no-param-reassign */

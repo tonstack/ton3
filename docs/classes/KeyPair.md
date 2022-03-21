@@ -1,4 +1,4 @@
-[tontools](../README.md) / KeyPair
+[@tonstack/tontools](../README.md) / KeyPair
 
 # Class: KeyPair
 

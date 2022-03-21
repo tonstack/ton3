@@ -1,8 +1,13 @@
-[tontools](../README.md) / Slice
+[@tonstack/tontools](../README.md) / Slice
 
 # Class: Slice
 
 ## Table of contents
+
+### Accessors
+
+- [bits](Slice.md#bits)
+- [refs](Slice.md#refs)
 
 ### Constructors
 
@@ -11,24 +16,43 @@
 ### Methods
 
 - [skip](Slice.md#skip)
-- [readRef](Slice.md#readref)
-- [readBit](Slice.md#readbit)
-- [readBits](Slice.md#readbits)
-- [readInt](Slice.md#readint)
-- [readUint](Slice.md#readuint)
-- [readBytes](Slice.md#readbytes)
-- [readString](Slice.md#readstring)
-- [readAddress](Slice.md#readaddress)
-- [readCoins](Slice.md#readcoins)
-- [from](Slice.md#from)
+- [loadRef](Slice.md#loadref)
+- [loadBit](Slice.md#loadbit)
+- [loadBits](Slice.md#loadbits)
+- [loadInt](Slice.md#loadint)
+- [loadUint](Slice.md#loaduint)
+- [loadBytes](Slice.md#loadbytes)
+- [loadString](Slice.md#loadstring)
+- [loadAddress](Slice.md#loadaddress)
+- [loadCoins](Slice.md#loadcoins)
+
+## Accessors
+
+### bits
+
+• `get` **bits**(): [`Bit`](../README.md#bit)[]
+
+#### Returns
+
+[`Bit`](../README.md#bit)[]
+
+___
+
+### refs
+
+• `get` **refs**(): [`Cell`](Cell.md)[]
+
+#### Returns
+
+[`Cell`](Cell.md)[]
 
 ## Constructors
 
 ### constructor
 
-• **new Slice**(`cell`)
+• **new Slice**(`bits`, `refs`)
 
-Creates an instance of [Slice](Slice.md) from provided [Cell](Cell.md)
+Creates an instance of [Slice](Slice.md)
 
 **`example`**
 ```ts
@@ -42,7 +66,8 @@ const slice = new Slice(cell)
 
 | Name | Type |
 | :------ | :------ |
-| `cell` | [`Cell`](Cell.md) |
+| `bits` | [`Bit`](../README.md#bit)[] |
+| `refs` | [`Cell`](Cell.md)[] |
 
 ## Methods
 
@@ -77,9 +102,9 @@ console.log(slice.skip(2).readBits(2)) // [ 1, 0 ]
 
 ___
 
-### readRef
+### loadRef
 
-▸ **readRef**(`splice?`): [`Cell`](Cell.md)
+▸ **loadRef**(`splice?`): [`Cell`](Cell.md)
 
 Read ref from [Slice](Slice.md)
 
@@ -109,9 +134,9 @@ console.log(slice.readRef()) // Cell
 
 ___
 
-### readBit
+### loadBit
 
-▸ **readBit**(`splice?`): [`Bit`](../README.md#bit)
+▸ **loadBit**(`splice?`): [`Bit`](../README.md#bit)
 
 Read bit from [Slice](Slice.md)
 
@@ -140,9 +165,9 @@ console.log(slice.readBit()) // 1
 
 ___
 
-### readBits
+### loadBits
 
-▸ **readBits**(`size`, `splice?`): [`Bit`](../README.md#bit)[]
+▸ **loadBits**(`size`, `splice?`): [`Bit`](../README.md#bit)[]
 
 Read bits from [Slice](Slice.md)
 
@@ -172,9 +197,9 @@ console.log(slice.readBits(2)) // [ 0, 1 ]
 
 ___
 
-### readInt
+### loadInt
 
-▸ **readInt**(`size`, `splice?`): `number`
+▸ **loadInt**(`size`, `splice?`): `number`
 
 Read int from [Slice](Slice.md)
 
@@ -204,9 +229,9 @@ console.log(slice.readUint(15)) // -14
 
 ___
 
-### readUint
+### loadUint
 
-▸ **readUint**(`size`, `splice?`): `number`
+▸ **loadUint**(`size`, `splice?`): `number`
 
 Read uint from [Slice](Slice.md)
 
@@ -236,9 +261,9 @@ console.log(slice.readUint(9)) // 14
 
 ___
 
-### readBytes
+### loadBytes
 
-▸ **readBytes**(`size`, `splice?`): `Uint8Array`
+▸ **loadBytes**(`size`, `splice?`): `Uint8Array`
 
 Read bytes from [Slice](Slice.md)
 
@@ -268,9 +293,9 @@ console.log(slice.readBytes(16)) // [ 255, 255 ]
 
 ___
 
-### readString
+### loadString
 
-▸ **readString**(`size?`, `splice?`): `string`
+▸ **loadString**(`size?`, `splice?`): `string`
 
 Read string from [Slice](Slice.md)
 
@@ -300,9 +325,9 @@ console.log(slice.readString()) // 'Привет, мир!'
 
 ___
 
-### readAddress
+### loadAddress
 
-▸ **readAddress**(`splice?`): [`Address`](Address.md)
+▸ **loadAddress**(`splice?`): [`Address`](Address.md)
 
 Read [Address](Address.md) from [Slice](Slice.md)
 
@@ -332,9 +357,9 @@ console.log(slice.readAddress().toString()) // 'kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15
 
 ___
 
-### readCoins
+### loadCoins
 
-▸ **readCoins**(`splice?`): [`Coins`](Coins.md)
+▸ **loadCoins**(`splice?`): [`Coins`](Coins.md)
 
 Read [Coins](Coins.md) from [Slice](Slice.md)
 
@@ -361,31 +386,3 @@ console.log(slice.readCoins().toString()) // '100'
 #### Returns
 
 [`Coins`](Coins.md)
-
-___
-
-### from
-
-▸ `Static` **from**(`cell`): [`Slice`](Slice.md)
-
-Create new [Slice](Slice.md) from given [Cell](Cell.md)
-
-**`static`**
-
-**`example`**
-```ts
-import { Cell, Slice } from '@tonstack/tontools'
-
-const cell = new Cell()
-const slice = Slice.from(cell)
-```
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `cell` | [`Cell`](Cell.md) | Cell to get slice from |
-
-#### Returns
-
-[`Slice`](Slice.md)

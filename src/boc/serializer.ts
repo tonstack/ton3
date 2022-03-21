@@ -3,14 +3,16 @@
 import { Cell } from './cell'
 import {
     Bit,
-    BitArray
-} from './bit-array'
+    Builder
+} from './builder'
 import {
     uintToHex,
     hexToBits,
     hexToBytes,
     bytesToUint,
-    bytesCompare
+    bytesCompare,
+    bitsToBytes,
+    bytesToBits
 } from '../utils/helpers'
 import { crc32cBytesLe } from '../utils/crypto'
 
@@ -18,10 +20,11 @@ const REACH_BOC_MAGIC_PREFIX = hexToBytes('B5EE9C72')
 const LEAN_BOC_MAGIC_PREFIX = hexToBytes('68FF65F3')
 const LEAN_BOC_MAGIC_PREFIX_CRC = hexToBytes('ACC3A728')
 
-interface SerializationOptions {
+interface BOCOptions {
     has_idx?: boolean
     hash_crc32?: boolean
     has_cache_bits?: boolean
+    topological_order?: 'breadth-first' | 'depth-first'
     flags?: number
 }
 
@@ -56,42 +59,54 @@ interface CellData {
     remainder: number[]
 }
 
-const deserializeFift = (data: string): Cell[] => {
-    if (!data) {
-        throw new Error('Can\'t deserialize. Empty fift hex.')
-    }
+// const deserializeFift = (data: string): Cell[] => {
+//     if (!data) {
+//         throw new Error('Can\'t deserialize. Empty fift hex.')
+//     }
 
-    const re = /((\s*)x{([0-9a-zA-Z_]+)}\n?)/gmi
-    const matches = [ ...data.matchAll(re) ] || []
+//     const re = /((\s*)x{([0-9a-zA-Z_]+)}\n?)/gmi
+//     const matches = [ ...data.matchAll(re) ] || []
 
-    if (!matches.length) {
-        throw new Error('Can\'t deserialize. Bad fift hex.')
-    }
+//     if (!matches.length) {
+//         throw new Error('Can\'t deserialize. Bad fift hex.')
+//     }
 
-    const tree = new Cell()
-    const stack: [ number, Cell ][] = [ [ 0, tree ] ]
-    const parsed = matches.map((el) => {
-        const [ , , indent, fift ] = el
-        const cell = new Cell()
+//     const parseFiftHex = (fift: string): Bit[] => {
+//         const bits = fift
+//             .split('')
+//             .map(el => (el === '_' ? el : hexToBits(el).join('')))
+//             .join('')
+//             .replace(/1[0]*_$/, '')
+//             .split('')
+//             .map(parseInt)
 
-        cell.bits.writeFiftHex(fift)
+//         return bits as Bit[]
+//     }
 
-        return { indent: indent.length, cell }
-    })
+//     const tree = new Builder()
+//     const stack: [ number, Builder ][] = [ [ 0, tree ] ]
+//     const parsed = matches.map((el) => {
+//         const [ , , indent, fift ] = el
+//         const bits = parseFiftHex(fift)
+//         const cell = new Builder()
+//             .storeBits(bits)
 
-    parsed.forEach((el) => {
-        while (stack.length && stack[stack.length - 1][0] >= el.indent) {
-            stack.pop()
-        }
+//         return { indent: indent.length, cell }
+//     })
 
-        const parent = stack.length ? stack[stack.length - 1][1] : tree
+//     parsed.forEach((el) => {
+//         while (stack.length && stack[stack.length - 1][0] >= el.indent) {
+//             stack.pop()
+//         }
 
-        parent.refs.push(el.cell)
-        stack.push([ el.indent, el.cell ])
-    })
+//         const parent = stack.length ? stack[stack.length - 1][1] : tree
 
-    return tree.refs
-}
+//         parent.refs.push(el.cell)
+//         stack.push([ el.indent, el.cell ])
+//     })
+
+//     return tree.refs
+// }
 
 const deserializeHeader = (bytes: number[]): BocHeader => {
     if (bytes.length < 4 + 1) {
@@ -196,24 +211,23 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
 
     const [ refsDescriptor, bitsDescriptor ] = remainder.splice(0, 2)
 
-    const isExotic = refsDescriptor & 8
+    // Exotic cell are currently unsupported
+    const _isExotic = !!(refsDescriptor & 8)
+    const isAugmented = bitsDescriptor % 2 !== 0
     const refNum = refsDescriptor % 8
-    const dataByteSize = Math.ceil(bitsDescriptor / 2)
+    const size = Math.ceil(bitsDescriptor / 2)
 
-    if (remainder.length < dataByteSize + refIndexSize * refNum) {
+    if (remainder.length < size + refIndexSize * refNum) {
         throw new Error('BoC not enough bytes to encode cell data')
     }
 
-    const dataByteArray = remainder.splice(0, dataByteSize)
-    const isAugmented = bitsDescriptor % 2 !== 0
-    const cell = new Cell()
+    const bits = isAugmented
+        ? Builder.rollbackBits(bytesToBits(remainder.splice(0, size)))
+        : bytesToBits(remainder.splice(0, size))
 
-    cell.isExotic = !!isExotic
-    cell.bits.writeBytes(dataByteArray)
-
-    if (isAugmented) {
-        cell.bits.rollback()
-    }
+    const cell = new Builder(bits.length)
+        .storeBits(bits)
+        .cell()
 
     const refIndexes = [ ...Array(refNum) ].reduce<number[]>((acc) => {
         const refIndex = bytesToUint(remainder.splice(0, refIndexSize))
@@ -247,19 +261,25 @@ const deserialize = (data: Uint8Array): Cell[] => {
         return acc
     }, { pointers: [], data: cells_data })
 
+    // TODO: fix to builder
     Object.keys(pointers)
         .reverse()
         .forEach((i) => {
             const pointerIndex = parseInt(i, 10)
             const pointer = pointers[pointerIndex]
+            const builder = new Builder().storeSlice(pointer.cell.parse())
 
             pointer.refIndexes.forEach((refIndex) => {
+                const ref = pointers[refIndex].cell
+
                 if (refIndex < pointerIndex) {
                     throw new Error('Topological order is broken')
                 }
 
-                pointer.cell.refs.push(pointers[refIndex].cell)
+                builder.storeRef(ref)
             })
+
+            pointer.cell = builder.cell()
         })
 
     return root_list.reduce((acc, refIndex) => acc.concat([ pointers[refIndex].cell ]), [] as Cell[])
@@ -368,24 +388,29 @@ const breadthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, num
 }
 
 const serializeCell = (cell: Cell, hashmap: Map<string, number>): Bit[] => {
-    const refsDescriptor = cell.refsDescriptor()
-    const bitsDescriptor = cell.bitsDescriptor()
-    const augmentedBits = cell.bits.clone().augment().getBits()
-    let repr = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
-
-    cell.refs.forEach((ref) => {
+    const bits = cell.refs.reduce((acc, ref) => {
         const refIndex = hashmap.get(ref.hash())
         const bits = hexToBits(uintToHex(refIndex))
 
-        repr = repr.concat(bits)
-    })
+        return acc.concat(bits)
+    }, [ ...cell.descriptors, ...cell.augmentedBits ] as Bit[])
 
-    return repr
+    return bits
 }
 
-const serialize = (root: Cell, options: SerializationOptions = {}): Uint8Array => {
-    const { has_idx = false, hash_crc32 = true, has_cache_bits = false, flags = 0 } = options
-    const { cells: cells_list, hashmap } = depthFirstSort(root)
+const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
+    const {
+        has_idx = false,
+        hash_crc32 = true,
+        has_cache_bits = false,
+        topological_order = 'breadth-first',
+        flags = 0
+    } = options
+
+    const { cells: cells_list, hashmap } = topological_order === 'breadth-first'
+        ? breadthFirstSort(root)
+        : depthFirstSort(root)
+
     const cells_num = cells_list.length
     const size = cells_num.toString(2).length
     const size_bytes = Math.min(Math.ceil(size / 8), 1)
@@ -401,38 +426,42 @@ const serialize = (root: Cell, options: SerializationOptions = {}): Uint8Array =
     const full_size = cells_bits.length / 8
     const offset_bits = full_size.toString(2).length
     const offset_bytes = Math.max(Math.ceil(offset_bits / 8), 1)
-    const header = new BitArray((1023 + 32 * 4 + 32 * 3) * cells_list.length)
+    const result = new Builder((1023 + 32 * 4 + 32 * 3) * cells_list.length)
 
-    header.writeBytes(REACH_BOC_MAGIC_PREFIX)
-        .writeBit(Number(has_idx))
-        .writeBit(Number(hash_crc32))
-        .writeBit(Number(has_cache_bits))
-        .writeUint(flags, 2)
-        .writeUint(size_bytes, 3)
-        .writeUint(offset_bytes, 8)
-        .writeUint(cells_num, size_bytes * 8)
-        .writeUint(1, size_bytes * 8) // More than 1 root cell is unsopperted atm
-        .writeUint(0, size_bytes * 8)
-        .writeUint(full_size, offset_bytes * 8)
-        .writeUint(0, size_bytes * 8)
+    result.storeBytes(REACH_BOC_MAGIC_PREFIX)
+        .storeBit(Number(has_idx))
+        .storeBit(Number(hash_crc32))
+        .storeBit(Number(has_cache_bits))
+        .storeUint(flags, 2)
+        .storeUint(size_bytes, 3)
+        .storeUint(offset_bytes, 8)
+        .storeUint(cells_num, size_bytes * 8)
+        .storeUint(1, size_bytes * 8) // More than 1 root cell is unsopperted atm
+        .storeUint(0, size_bytes * 8)
+        .storeUint(full_size, offset_bytes * 8)
+        .storeUint(0, size_bytes * 8)
 
     if (has_idx) {
-        cells_list.forEach((_, index) => header.writeUint(size_index[index], offset_bytes * 8))
+        cells_list.forEach((_, index) => {
+            result.storeUint(size_index[index], offset_bytes * 8)
+        })
     }
 
-    header.writeBits(cells_bits)
+    const augmentedBits = Builder.augmentBits(result.storeBits(cells_bits).bits)
+    const bytes = bitsToBytes(augmentedBits)
 
-    const boc = header.augment()
-    const result = hash_crc32
-        ? boc.writeBytes(crc32cBytesLe(boc.getBytes()))
-        : boc
+    if (hash_crc32) {
+        const hashsum = crc32cBytesLe(bytes)
 
-    return result.getBytes()
+        return new Uint8Array([ ...bytes, ...hashsum ])
+    }
+
+    return bytes
 }
 
 export {
     serialize,
     deserialize,
-    deserializeFift,
-    SerializationOptions
+    // deserializeFift,
+    BOCOptions
 }

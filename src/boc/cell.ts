@@ -1,7 +1,7 @@
 import {
     Bit,
-    BitArray
-} from './bit-array'
+    Builder
+} from './builder'
 import { Slice } from './slice'
 import {
     bitsToHex,
@@ -13,84 +13,62 @@ import {
 } from '../utils/crypto'
 
 class Cell {
-    public bits: BitArray
+    private _bits: Bit[]
 
-    public refs: Cell[]
+    private _refs: Cell[]
 
-    public isExotic: boolean
+    private _exotic: boolean
 
-    constructor () {
-        this.bits = new BitArray()
-        this.refs = []
-        this.isExotic = false
+    constructor (bits: Bit[] = [], refs: Cell[] = [], exotic = false) {
+        this._bits = bits
+        this._refs = refs
+        this._exotic = exotic
     }
 
-    private getMaxLevel (): number {
-        // TODO: level calculation differ for exotic cells
-
-        return this.refs.reduce((acc, cell) => {
-            const level = cell.getMaxLevel()
-
-            return level > acc ? level : acc
-        }, 0)
+    public get bits (): Bit[] {
+        return Array.from(this._bits)
     }
 
-    private getMaxDepth (): number {
-        const maxDepth = this.refs.reduce((acc, cell) => {
-            const depth = cell.getMaxDepth()
-
-            return depth > acc ? depth : acc
-        }, 0)
-
-        return this.refs.length
-            ? maxDepth + 1
-            : maxDepth
+    public get refs (): Cell[] {
+        return Array.from(this._refs)
     }
 
-    concat (cell: Cell): void {
-        this.bits.append(cell.bits)
-        this.refs = [ ...this.refs, ...cell.refs ]
+    public get exotic (): boolean {
+        return this._exotic
     }
 
-    maxDepth (): Bit[] {
-        const maxDepth = this.getMaxDepth()
+    private get maxDepth (): Bit[] {
+        const maxDepth = this.calculateMaxDepth()
         const value = Math.floor(maxDepth / 256) + (maxDepth % 256)
         const bits = value.toString(2).padStart(16, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
     }
 
-    refsDescriptor (): Bit[] {
-        const refs = this.refs.length + (Number(this.isExotic) * 8) + (this.getMaxLevel() * 32)
+    private get refsDescriptor (): Bit[] {
+        const refs = this._refs.length + (Number(this._exotic) * 8) + (this.calculateMaxLevel() * 32)
         const bits = refs.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
     }
 
-    bitsDescriptor (): Bit[] {
-        const cap = Math.ceil(this.bits.length / 8) + Math.floor(this.bits.length / 8)
+    private get bitsDescriptor (): Bit[] {
+        const cap = Math.ceil(this._bits.length / 8) + Math.floor(this._bits.length / 8)
         const bits = cap.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
     }
 
-    toSlice (): Slice {
-        return new Slice(this)
-    }
+    private get representation (): Bit[] {
+        let representation = [ ...this.descriptors, ...this.augmentedBits ]
 
-    getRepresentation (): Bit[] {
-        const refsDescriptor = this.refsDescriptor()
-        const bitsDescriptor = this.bitsDescriptor()
-        const augmentedBits = this.bits.clone().augment().getBits()
-        let representation = [ ...refsDescriptor, ...bitsDescriptor, ...augmentedBits ]
-
-        this.refs.forEach((ref) => {
-            const depth = ref.maxDepth()
+        this._refs.forEach((ref) => {
+            const depth = ref.maxDepth
 
             representation = [ ...representation, ...depth ]
         })
 
-        this.refs.forEach((ref) => {
+        this._refs.forEach((ref) => {
             const hash = ref.hash()
             const bits = hexToBits(hash)
 
@@ -100,20 +78,57 @@ class Cell {
         return representation
     }
 
-    hash (): string {
-        const representation = this.getRepresentation()
-        const hex = bitsToHex(representation)
+    private calculateMaxLevel (): number {
+        // TODO: write code for exotic cells support
+        if (!this.exotic) {
+            return 0
+        }
+
+        return 0
+    }
+
+    private calculateMaxDepth (): number {
+        const maxDepth = this._refs.reduce((acc, cell) => {
+            const depth = cell.calculateMaxDepth()
+
+            return depth > acc ? depth : acc
+        }, 0)
+
+        return this._refs.length
+            ? maxDepth + 1
+            : maxDepth
+    }
+
+    public get descriptors (): Bit[] {
+        return [ ...this.refsDescriptor, ...this.bitsDescriptor ]
+    }
+
+    public get augmentedBits (): Bit[] {
+        return Builder.augmentBits(this._bits)
+    }
+
+    public hash (): string {
+        const hex = bitsToHex(this.representation)
         const hash = sha256(encoderHex.parse(hex))
 
         return hash.toString()
     }
 
-    print (indent: string = ''): string {
-        const output = [ `${indent}x{${this.bits.toString('fift')}}\n` ]
+    public print (indent: string = ''): string {
+        const bits = Array.from(this._bits)
+        const areDivisible = bits.length % 4 === 0
+        const augmented = !areDivisible ? Builder.augmentBits(bits, 4) : bits
+        const fiftHex = `${bitsToHex(augmented).toUpperCase()}${areDivisible ? '_' : ''}`
+        const output = [ `${indent}x{${fiftHex}}\n` ]
 
-        this.refs.forEach(ref => output.push(ref.print(`${indent} `)))
+        this._refs.forEach(ref => output.push(ref.print(`${indent} `)))
 
         return output.join('')
+    }
+
+    public parse (): Slice {
+        // Use getters to get a copy of an arrays
+        return new Slice(this.bits, this.refs)
     }
 }
 

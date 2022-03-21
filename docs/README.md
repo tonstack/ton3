@@ -1,6 +1,6 @@
-tontools
+@tonstack/tontools
 
-# tontools
+# @tonstack/tontools
 
 ## Table of contents
 
@@ -12,9 +12,9 @@ tontools
 ### Classes
 
 - [Address](classes/Address.md)
-- [BitArray](classes/BitArray.md)
+- [Builder](classes/Builder.md)
 - [Cell](classes/Cell.md)
-- [BoC](classes/BoC.md)
+- [BOC](classes/BOC.md)
 - [Slice](classes/Slice.md)
 - [Coins](classes/Coins.md)
 - [MsgTemplate](classes/MsgTemplate.md)
@@ -22,11 +22,10 @@ tontools
 
 ### Interfaces
 
-- [SerializationOptions](interfaces/SerializationOptions.md)
+- [BOCOptions](interfaces/BOCOptions.md)
 
 ### Functions
 
-- [deserializeFift](README.md#deserializefift)
 - [deserialize](README.md#deserialize)
 - [serialize](README.md#serialize)
 - [crc16BytesBe](README.md#crc16bytesbe)
@@ -66,22 +65,6 @@ ___
 
 ## Functions
 
-### deserializeFift
-
-▸ **deserializeFift**(`data`): [`Cell`](classes/Cell.md)[]
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `data` | `string` |
-
-#### Returns
-
-[`Cell`](classes/Cell.md)[]
-
-___
-
 ### deserialize
 
 ▸ **deserialize**(`data`): [`Cell`](classes/Cell.md)[]
@@ -107,7 +90,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `root` | [`Cell`](classes/Cell.md) |
-| `options` | [`SerializationOptions`](interfaces/SerializationOptions.md) |
+| `options` | [`BOCOptions`](interfaces/BOCOptions.md) |
 
 #### Returns
 

@@ -1,14 +1,16 @@
-[tontools](../README.md) / Cell
+[@tonstack/tontools](../README.md) / Cell
 
 # Class: Cell
 
 ## Table of contents
 
-### Properties
+### Accessors
 
 - [bits](Cell.md#bits)
 - [refs](Cell.md#refs)
-- [isExotic](Cell.md#isexotic)
+- [exotic](Cell.md#exotic)
+- [descriptors](Cell.md#descriptors)
+- [augmentedBits](Cell.md#augmentedbits)
 
 ### Constructors
 
@@ -16,95 +18,75 @@
 
 ### Methods
 
-- [concat](Cell.md#concat)
-- [maxDepth](Cell.md#maxdepth)
-- [refsDescriptor](Cell.md#refsdescriptor)
-- [bitsDescriptor](Cell.md#bitsdescriptor)
-- [toSlice](Cell.md#toslice)
 - [hash](Cell.md#hash)
 - [print](Cell.md#print)
+- [parse](Cell.md#parse)
 
-## Properties
+## Accessors
 
 ### bits
 
-• **bits**: [`BitArray`](BitArray.md)
+• `get` **bits**(): [`Bit`](../README.md#bit)[]
+
+#### Returns
+
+[`Bit`](../README.md#bit)[]
 
 ___
 
 ### refs
 
-• **refs**: [`Cell`](Cell.md)[]
+• `get` **refs**(): [`Cell`](Cell.md)[]
+
+#### Returns
+
+[`Cell`](Cell.md)[]
 
 ___
 
-### isExotic
+### exotic
 
-• **isExotic**: `boolean`
+• `get` **exotic**(): `boolean`
+
+#### Returns
+
+`boolean`
+
+___
+
+### descriptors
+
+• `get` **descriptors**(): [`Bit`](../README.md#bit)[]
+
+#### Returns
+
+[`Bit`](../README.md#bit)[]
+
+___
+
+### augmentedBits
+
+• `get` **augmentedBits**(): [`Bit`](../README.md#bit)[]
+
+#### Returns
+
+[`Bit`](../README.md#bit)[]
 
 ## Constructors
 
 ### constructor
 
-• **new Cell**()
-
-## Methods
-
-### concat
-
-▸ **concat**(`cell`): `void`
+• **new Cell**(`bits?`, `refs?`, `exotic?`)
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `cell` | [`Cell`](Cell.md) |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `bits` | [`Bit`](../README.md#bit)[] | `[]` |
+| `refs` | [`Cell`](Cell.md)[] | `[]` |
+| `exotic` | `boolean` | `false` |
 
-#### Returns
-
-`void`
-
-___
-
-### maxDepth
-
-▸ **maxDepth**(): [`Bit`](../README.md#bit)[]
-
-#### Returns
-
-[`Bit`](../README.md#bit)[]
-
-___
-
-### refsDescriptor
-
-▸ **refsDescriptor**(): [`Bit`](../README.md#bit)[]
-
-#### Returns
-
-[`Bit`](../README.md#bit)[]
-
-___
-
-### bitsDescriptor
-
-▸ **bitsDescriptor**(): [`Bit`](../README.md#bit)[]
-
-#### Returns
-
-[`Bit`](../README.md#bit)[]
-
-___
-
-### toSlice
-
-▸ **toSlice**(): [`Slice`](Slice.md)
-
-#### Returns
-
-[`Slice`](Slice.md)
-
-___
+## Methods
 
 ### hash
 
@@ -129,3 +111,13 @@ ___
 #### Returns
 
 `string`
+
+___
+
+### parse
+
+▸ **parse**(): [`Slice`](Slice.md)
+
+#### Returns
+
+[`Slice`](Slice.md)

@@ -1,5 +1,5 @@
 import { TextEncoder, TextDecoder } from 'util'
-import { Bit } from '../boc/bit-array'
+import { Bit } from '../boc/builder'
 
 const isNodeEnv = typeof process === 'object' && process.title === 'node'
 

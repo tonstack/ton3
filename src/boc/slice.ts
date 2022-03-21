@@ -1,4 +1,5 @@
-import { Bit } from './bit-array'
+import type { Cell } from './cell'
+import type { Bit } from './builder'
 import { Coins } from '../coins'
 import { Address } from '../address'
 import {
@@ -6,17 +7,17 @@ import {
     bytesToString,
     bitsToHex
 } from '../utils/helpers'
-import type { Cell } from './cell'
 
 class Slice {
-    private bits: Bit[]
+    private _bits: Bit[]
 
-    private refs: Cell[]
+    private _refs: Cell[]
 
     /**
-     * Creates an instance of {@link Slice} from provided {@link Cell}
+     * Creates an instance of {@link Slice}
      * 
-     * @param {Cell} cell
+     * @param {Bit[]} bits
+     * @param {Cell[]} refs
      * 
      * @example
      * ```ts
@@ -26,9 +27,17 @@ class Slice {
      * const slice = new Slice(cell)
      * ```
      */
-    constructor (cell: Cell) {
-        this.bits = cell.bits.getBits()
-        this.refs = Array.from(cell.refs)
+    constructor (bits: Bit[], refs: Cell[]) {
+        this._bits = bits
+        this._refs = refs
+    }
+
+    public get bits (): Bit[] {
+        return Array.from(this._bits)
+    }
+
+    public get refs (): Cell[] {
+        return Array.from(this._refs)
     }
 
     /**
@@ -82,7 +91,7 @@ class Slice {
      * 
      * @return {Cell}
      */
-    public readRef (splice: boolean = true): Cell {
+    public loadRef (splice: boolean = true): Cell {
         if (!this.refs.length) {
             throw new Error('Slice refs overflow')
         }
@@ -110,7 +119,7 @@ class Slice {
      * 
      * @return {Bit[]}
      */
-    public readBit (splice: boolean = true): Bit {
+    public loadBit (splice: boolean = true): Bit {
         if (!this.bits.length) {
             throw new Error('Slice bits overflow')
         }
@@ -139,7 +148,7 @@ class Slice {
      * 
      * @return {Bit[]}
      */
-    public readBits (size: number, splice: boolean = true): Bit[] {
+    public loadBits (size: number, splice: boolean = true): Bit[] {
         if (size <= 0 || this.bits.length < size) {
             throw new Error('Slice bits overflow')
         }
@@ -168,8 +177,8 @@ class Slice {
      * 
      * @return {number}
      */
-    public readInt (size: number, splice: boolean = true): number {
-        const uint = this.readUint(size, splice)
+    public loadInt (size: number, splice: boolean = true): number {
+        const uint = this.loadUint(size, splice)
         const int = 1 << (size - 1)
 
         return uint >= int ? (uint - (int * 2)) : uint
@@ -196,8 +205,8 @@ class Slice {
      * 
      * @return {number}
      */
-    public readUint (size: number, splice: boolean = true): number {
-        const bits = this.readBits(size, splice)
+    public loadUint (size: number, splice: boolean = true): number {
+        const bits = this.loadBits(size, splice)
 
         return bits.reverse().reduce((acc, bit, i) => (bit * (2 ** i) + acc), 0)
     }
@@ -222,8 +231,8 @@ class Slice {
      * 
      * @return {Uint8Array}
      */
-    public readBytes (size: number, splice: boolean = true): Uint8Array {
-        const bits = this.readBits(size, splice)
+    public loadBytes (size: number, splice: boolean = true): Uint8Array {
+        const bits = this.loadBits(size, splice)
         
         return bitsToBytes(bits)
     }
@@ -249,10 +258,10 @@ class Slice {
      * 
      * @return {string}
      */
-    public readString (size: number = null, splice: boolean = true): string {
+    public loadString (size: number = null, splice: boolean = true): string {
         const bytes = size === null
-            ? this.readBytes(this.bits.length, splice)
-            : this.readBytes(size, splice)
+            ? this.loadBytes(this.bits.length, splice)
+            : this.loadBytes(size, splice)
 
         return bytesToString(bytes)
     }
@@ -278,10 +287,10 @@ class Slice {
      * 
      * @return {Address}
      */
-    public readAddress (splice: boolean = true): Address | null {
+    public loadAddress (splice: boolean = true): Address | null {
         const FLAG_ADDRESS_NO = [ 0, 0 ]
         const FLAG_ADDRESS = [ 1, 0 ]
-        const flag = this.readBits(2, false)
+        const flag = this.loadBits(2, false)
 
         if (flag.every((bit, i) => bit === FLAG_ADDRESS_NO[i])) {
             return splice
@@ -292,7 +301,7 @@ class Slice {
         if (flag.every((bit, i) => bit === FLAG_ADDRESS[i])) {
             // 2 bits flag, 1 bit anycast, 8 bits workchain, 256 bits address hash
             const size = 2 + 1 + 8 + 256
-            const bits = this.readBits(size, false)
+            const bits = this.loadBits(size, false)
             // Splice 2 because we dont need flag bits
             // Anycast is currently unused
             const _anycast = bits.splice(2, 1)
@@ -329,8 +338,8 @@ class Slice {
      * 
      * @return {Coins}
      */
-    public readCoins (splice: boolean = true): Coins {
-        const length = this.readUint(4, false)
+    public loadCoins (splice: boolean = true): Coins {
+        const length = this.loadUint(4, false)
 
         if (length === 0) {
             return splice
@@ -339,32 +348,12 @@ class Slice {
         }
 
         const size = 4 + (length * 8)
-        const bits = this.readBits(size, false)
+        const bits = this.loadBits(size, false)
         const hex = `0x${bitsToHex(bits.splice(4))}`
 
         return splice
             ? this.skip(size) && new Coins(hex, true)
             : new Coins(hex, true)
-    }
-
-    /**
-     * Create new {@link Slice} from given {@link Cell}
-     *
-     * @static
-     * @param {Cell} cell - Cell to get slice from
-     * 
-     * @example
-     * ```ts
-     * import { Cell, Slice } from '@tonstack/tontools'
-     * 
-     * const cell = new Cell()
-     * const slice = Slice.from(cell)
-     * ```
-     * 
-     * @return {Slice}
-     */
-    public static from (cell: Cell): Slice {
-        return new Slice(cell)
     }
 }
 

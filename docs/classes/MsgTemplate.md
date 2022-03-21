@@ -1,4 +1,4 @@
-[tontools](../README.md) / MsgTemplate
+[@tonstack/tontools](../README.md) / MsgTemplate
 
 # Class: MsgTemplate
 

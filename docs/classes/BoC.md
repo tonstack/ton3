@@ -1,69 +1,105 @@
-[tontools](../README.md) / BoC
+[@tonstack/tontools](../README.md) / BOC
 
-# Class: BoC
+# Class: BOC
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](BoC.md#constructor)
-
-### Properties
-
-- [root](BoC.md#root)
+- [constructor](BOC.md#constructor)
 
 ### Methods
 
-- [from](BoC.md#from)
-- [toBytes](BoC.md#tobytes)
-- [toHex](BoC.md#tohex)
+- [from](BOC.md#from)
+- [fromStandard](BOC.md#fromstandard)
+- [toBytes](BOC.md#tobytes)
+- [toBytesStandard](BOC.md#tobytesstandard)
+- [toHex](BOC.md#tohex)
+- [toHexStandard](BOC.md#tohexstandard)
 
 ## Constructors
 
 ### constructor
 
-• **new BoC**(`cells?`)
-
-#### Parameters
-
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `cells` | [`Cell`](Cell.md)[] | `[]` |
-
-## Properties
-
-### root
-
-• **root**: [`Cell`](Cell.md)[]
+• **new BOC**()
 
 ## Methods
 
 ### from
 
-▸ `Static` **from**(`data`, `type?`): [`BoC`](BoC.md)
+▸ `Static` **from**(`data`): [`Cell`](Cell.md)[]
+
+Returns deserialized BOC root cells.
+
+**`static`**
 
 #### Parameters
 
-| Name | Type | Default value |
+| Name | Type | Description |
 | :------ | :------ | :------ |
-| `data` | `string` \| `Uint8Array` | `undefined` |
-| `type` | ``"fift"`` \| ``"hex"`` \| ``"bytes"`` | `'bytes'` |
+| `data` | `string` \| `Uint8Array` | Bytes or HEX of serialized BOC. |
 
 #### Returns
 
-[`BoC`](BoC.md)
+[`Cell`](Cell.md)[]
+
+___
+
+### fromStandard
+
+▸ `Static` **fromStandard**(`data`): [`Cell`](Cell.md)
+
+Returns deserialized standard BOC root cell.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `data` | `string` \| `Uint8Array` | Bytes or HEX of serialized BOC. |
+
+#### Returns
+
+[`Cell`](Cell.md)
 
 ___
 
 ### toBytes
 
-▸ **toBytes**(`options?`): `Uint8Array`
+▸ `Static` **toBytes**(`cells`, `options?`): `Uint8Array`
+
+Returns serialized BOC in bytes representation.
+
+**`static`**
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `options?` | [`SerializationOptions`](../interfaces/SerializationOptions.md) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cells` | [`Cell`](Cell.md)[] | Root cells. |
+| `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
+
+#### Returns
+
+`Uint8Array`
+
+___
+
+### toBytesStandard
+
+▸ `Static` **toBytesStandard**(`cell`, `options?`): `Uint8Array`
+
+Returns serialized standard BOC in bytes representation.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cell` | [`Cell`](Cell.md) | Root cell. |
+| `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
 
 #### Returns
 
@@ -73,13 +109,39 @@ ___
 
 ### toHex
 
-▸ **toHex**(`options?`): `string`
+▸ `Static` **toHex**(`cells`, `options?`): `string`
+
+Returns serialized BOC in hex representation.
+
+**`static`**
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `options?` | [`SerializationOptions`](../interfaces/SerializationOptions.md) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cells` | [`Cell`](Cell.md)[] | Root cells. |
+| `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
+
+#### Returns
+
+`string`
+
+___
+
+### toHexStandard
+
+▸ `Static` **toHexStandard**(`cell`, `options?`): `string`
+
+Returns serialized standard BOC in hex representation.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cell` | [`Cell`](Cell.md) | Root cell. |
+| `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
 
 #### Returns
 

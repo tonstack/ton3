@@ -1,4 +1,4 @@
-import { Bit } from '../boc/bit-array'
+import { Bit } from '../boc/builder'
 import {
     bytesToBits,
     bytesToHex,

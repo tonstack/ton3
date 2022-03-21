@@ -1,6 +1,6 @@
 {
   "name": "@tonstack/tontools",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "TON low-level API tools",
   "main": "./dist/index.js",
   "scripts": {

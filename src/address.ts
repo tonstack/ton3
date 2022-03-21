@@ -31,13 +31,14 @@ interface AddressData extends AddressTag {
  * @class Address
  */
 class Address {
-    private workchain: number
 
-    private hash: Uint8Array
+    private _hash: Uint8Array
 
-    private bounceable: boolean
+    private _workchain: number
 
-    private testOnly: boolean
+    private _bounceable: boolean
+
+    private _testOnly: boolean
 
     /**
      * Creates an instance of {@link Address}
@@ -97,224 +98,50 @@ class Address {
             throw new Error('Can\'t parse address. Unknown type')
         }
 
-        this.workchain = result.workchain
-        this.hash = result.hash
-        this.bounceable = result.bounceable
-        this.testOnly = result.testOnly
+        this._workchain = result.workchain
+        this._hash = result.hash
+        this._bounceable = result.bounceable
+        this._testOnly = result.testOnly
     }
 
-    /**
-     * Get raw or base64 representation of {@link Address}
-     * 
-     * @param {AddressType} [type="base64"] - Can be "base64" or "raw"
-     * @param {boolean} [urlSafe=true] - Url-safe representation (only works for base64)
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     *     .setBounceableFlag(true)
-     *     .setTestOnlyFlag(true)
-     * 
-     * console.log(address.toString('base64')) // kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
-     * console.log(address.toString('base64', false)) // kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
-     * console.log(address.toString('raw')) // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
-     * ```
-     * 
-     * @returns {string}
-     */
-    public toString (type: AddressType = 'base64', urlSafe = true): string {
-        const { workchain, bounceable, testOnly } = this
-
-        if (type === 'raw') {
-            return `${workchain}:${bytesToHex(this.hash)}`.toUpperCase()
-        }
-
-        const tag = Address.encodeTag({ bounceable, testOnly })
-        const address = [ tag, int8ToUint8(workchain) ].concat(Array.from(this.hash))
-        const hashsum = crc16BytesBe(address)
-        const addressWithHashsum = address.concat(Array.from(hashsum))
-        const base64 = bytesToBase64(addressWithHashsum)
-
-        return urlSafe
-            ? base64.replaceAll(/\//g, '_').replaceAll(/\+/g, '-')
-            : base64.replaceAll(/_/g, '/').replaceAll(/-/g, '+')
+    public get hash (): Uint8Array {
+        return new Uint8Array(this._hash)
     }
 
-    /**
-     * Set int8 as Workchain ID
-     *
-     * @param {number} value
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * address.setWorkchain(0)
-     * ```
-     * 
-     * @return {this}
-     */
-    public setWorkchain (value: number): this {
+    public get workchain (): number {
+        return this._workchain
+    }
+
+    public get bounceable (): boolean {
+        return this._bounceable
+    }
+
+    public get testOnly (): boolean {
+        return this._testOnly
+    }
+
+    public set workchain (value: number) {
         if (typeof value !== 'number' || value < -128 || value >= 128) {
-            throw new Error('Workchain ID must be int8')
+            throw new Error('Address: workchain must be int8')
         }
 
-        this.workchain = value
-
-        return this
+        this._workchain = value
     }
 
-    /**
-     * If the transaction has been aborted, and the inbound message has its bounceable flag set to true, 
-     * then it is "bounced" by automatically generating an outbound message (with the bounce flag clear) to its original sender
-     *
-     * @param {boolean} value
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * address.setBounceableFlag(true)
-     * ```
-     * 
-     * @return {this}
-     */
-    public setBounceableFlag (value: boolean): this {
+    public set bounceable (value: boolean) {
         if (typeof value !== 'boolean') {
-            throw new Error('Bounceable flag must be a boolean')
+            throw new Error('Address: bounceable flag must be a boolean')
         }
 
-        this.bounceable = value
-
-        return this
+        this._bounceable = value
     }
 
-    /**
-     * Set if address should not be accepted by software running in the production network
-     *
-     * @param {boolean} value
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * address.setTestOnlyFlag(true)
-     * ```
-     * 
-     * @return {this}
-     */
-    public setTestOnlyFlag (value: boolean): this {
+    public set testOnly (value: boolean) {
         if (typeof value !== 'boolean') {
-            throw new Error('TestOnly flag must be a boolean')
+            throw new Error('Address: testOnly flag must be a boolean')
         }
 
-        this.testOnly = value
-
-        return this
-    }
-
-    /**
-     * Returns address hash as Uint8Array with 32 bytes length
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * console.log(address.getHash())
-     * // Uint8Array(32) [
-     * //     252, 185,  26,  58,  56,  22, 208, 247,
-     * //     184, 194, 199,  97,   8, 184, 169, 188,
-     * //     90, 107, 122,  85, 189, 121, 248, 171,
-     * //     16,  28,  82, 219,  41,  35,  34,  96
-     * // ]
-     * ```
-     * 
-     * @return {Uint8Array}
-     */
-    public getHash (): Uint8Array {
-        return this.hash
-    }
-
-    /**
-     * Returns workchain as int8
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * console.log(address.getWorkchain()) // -1
-     * ```
-     * 
-     * @return {number}
-     */
-    public getWorkchain (): number {
-        return this.workchain
-    }
-
-    /**
-     * Returns value of bounceable flag
-     * 
-     * @example
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * console.log(address.isBounceable()) // false
-     * ```
-     * 
-     * @return {boolean}
-     */
-    public isBounceable (): boolean {
-        return this.bounceable
-    }
-
-    /**
-     * Return value of test only flag
-     * 
-     * @example
-     * ```ts
-     * import { Address } from '@tonstack/tontools'
-     * 
-     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
-     * const address = new Address(raw)
-     * 
-     * console.log(address.isTestOnly()) // false
-     * ```
-     * 
-     * @return {boolean}
-     */
-    public isTestOnly (): boolean {
-        return this.testOnly
-    }
-
-    /**
-     * Helper method for writing null addresses to {@link BitArray}
-     *
-     * @static
-     */
-    public static readonly NULL = null
-
-    private static isAddress (address: any): boolean {
-        return address instanceof Address
+        this._testOnly = value
     }
 
     private static isEncoded (address: any): boolean {
@@ -333,30 +160,6 @@ class Address {
         return ArrayBuffer.isView(address) && address.byteLength === 33 
     }
 
-    public static isValid (address: any): boolean {
-        try {
-            new Address(address)
-
-            return true
-        } catch (e) {
-            return false
-        }
-    }
-
-    private static parseAddress (value: Address): AddressData {
-        const workchain = value.workchain
-        const hash = new Uint8Array(value.hash)
-        const bounceable = value.isBounceable()
-        const testOnly = value.isTestOnly()
-
-        return {
-            bounceable,
-            testOnly,
-            workchain,
-            hash
-        }
-    }
-
     private static parseEncoded (value: string): AddressData {
         const bytes = base64ToBytes(value)
         const data = Array.from(bytes)
@@ -372,6 +175,20 @@ class Address {
         const workchain = uint8toInt8(address.shift())
         const hash = new Uint8Array(address.splice(0, 32))
         const { bounceable, testOnly } = Address.decodeTag(tag)
+
+        return {
+            bounceable,
+            testOnly,
+            workchain,
+            hash
+        }
+    }
+
+    private static parseAddress (value: Address): AddressData {
+        const workchain = value.workchain
+        const hash = new Uint8Array(value.hash)
+        const bounceable = value.bounceable
+        const testOnly = value.testOnly
 
         return {
             bounceable,
@@ -434,6 +251,67 @@ class Address {
         return {
             bounceable,
             testOnly
+        }
+    }
+
+    /**
+     * Get raw or base64 representation of {@link Address}
+     * 
+     * @param {AddressType} [type="base64"] - Can be "base64" or "raw"
+     * @param {boolean} [urlSafe=true] - Url-safe representation (only works for base64)
+     * 
+     * @example
+     * ```ts
+     * import { Address } from '@tonstack/tontools'
+     * 
+     * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
+     * const address = new Address(raw)
+     *     .setBounceableFlag(true)
+     *     .setTestOnlyFlag(true)
+     * 
+     * console.log(address.toString('base64')) // kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
+     * console.log(address.toString('base64', false)) // kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
+     * console.log(address.toString('raw')) // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
+     * ```
+     * 
+     * @returns {string}
+     */
+    public toString (type: AddressType = 'base64', urlSafe: boolean = true): string {
+        const { workchain, bounceable, testOnly } = this
+
+        if (type === 'raw') {
+            return `${workchain}:${bytesToHex(this._hash)}`.toUpperCase()
+        }
+
+        const tag = Address.encodeTag({ bounceable, testOnly })
+        const address = [ tag, int8ToUint8(workchain) ].concat(Array.from(this._hash))
+        const hashsum = crc16BytesBe(address)
+        const addressWithHashsum = address.concat(Array.from(hashsum))
+        const base64 = bytesToBase64(addressWithHashsum)
+
+        return urlSafe
+            ? base64.replaceAll(/\//g, '_').replaceAll(/\+/g, '-')
+            : base64.replaceAll(/_/g, '/').replaceAll(/-/g, '+')
+    }
+
+    /**
+     * Helper method for writing null addresses to {@link BitArray}
+     *
+     * @static
+     */
+    public static readonly NULL = null
+
+    private static isAddress (address: any): boolean {
+        return address instanceof Address
+    }
+
+    public static isValid (address: any): boolean {
+        try {
+            new Address(address)
+
+            return true
+        } catch (e) {
+            return false
         }
     }
 }

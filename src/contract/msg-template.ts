@@ -1,6 +1,7 @@
 import { Address } from 'address'
 import { Coins } from '../coins'
 import { Cell } from '../boc/cell'
+import { Builder } from '../boc/builder'
 
 class MsgTemplate {
     /**
@@ -11,13 +12,13 @@ class MsgTemplate {
         src: Address = Address.NULL,
         importFee: Coins = new Coins(0)
     ): Cell {
-        const cell = new Cell()
-
-        cell.bits
-            .writeBits([ 1, 0 ]) // ext_in_msg_info$10 constructor
-            .writeAddress(src)
-            .writeAddress(dest)
-            .writeCoins(importFee)
+        const builder = new Builder()
+        const cell = builder
+            .storeBits([ 1, 0 ]) // ext_in_msg_info$10 constructor
+            .storeAddress(src)
+            .storeAddress(dest)
+            .storeCoins(importFee)
+            .cell()
 
         return cell
     }
@@ -26,37 +27,38 @@ class MsgTemplate {
      *  Creates a new MessageX
      */
     public static MessageX (info: Cell, init: Cell | null, body: Cell | null): Cell {
-        const cell = new Cell()
-        cell.bits.append(info.bits)
+        const builder = new Builder()
+
+        builder.storeBits(info.bits)
 
         if (init) {
-            cell.bits.writeBit(1) // Maybe bit
+            builder.storeBit(1) // Maybe bit
 
             // -1 because we need at least 1 bit for the body
-            if (cell.bits.remainder - 1 >= init.bits.length) {
-                cell.bits.writeBit(0) // Either bit
-                    .append(init.bits)
+            if (builder.remainder - 1 >= init.bits.length) {
+                builder.storeBit(0) // Either bit
+                    .storeBits(init.bits)
             } else {
-                cell.bits.writeBit(0) // Either bit
-                cell.refs.push(init)
+                builder.storeBit(0) // Either bit
+                    .storeRef(init)
             }
         } else {
-            cell.bits.writeBit(0) // Maybe bit
+            builder.storeBit(0) // Maybe bit
         }
 
         if (body) {
-            if (cell.bits.remainder >= init.bits.length) {
-                cell.bits.writeBit(0) // Either bit
-                    .append(body.bits)
+            if (builder.remainder >= init.bits.length) {
+                builder.storeBit(0) // Either bit
+                    .storeBits(body.bits)
             } else {
-                cell.bits.writeBit(1) // Either bit
-                cell.refs.push(body)
+                builder.storeBit(1) // Either bit
+                    .storeRef(body)
             }
         } else {
-            cell.bits.writeBit(0) // minimum body bit
+            builder.storeBit(0) // minimum body bit
         }
 
-        return cell
+        return builder.cell()
     }
 }
 

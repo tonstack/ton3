@@ -1,18 +1,34 @@
-import { Address } from 'address'
+import { Address } from '../address'
 import { Coins } from '../coins'
 import { Cell } from '../boc/cell'
 import { Builder } from '../boc/builder'
+
+interface ExtInMsgInfo$10Options {
+    src?: Address | null
+    dest: Address
+    importFee?: Coins
+}
+
+interface MessageXOptions {
+    info: Cell
+    init: Cell | null
+    body: Cell | null
+}
+
+interface StateInitOptions {
+    code: Cell,
+    data: Cell | null
+}
 
 class MsgTemplate {
     /**
      * Creates a new `CommonMsgInfo` with `ext_in_msg_info$10` prefix
      */
-    public static ExtInMsgInfo$10 (
-        dest: Address,
-        src: Address = Address.NULL,
-        importFee: Coins = new Coins(0)
-    ): Cell {
+    public static ExtInMsgInfo$10 (options: ExtInMsgInfo$10Options): Cell {
+        const { src = null, importFee = new Coins(0), dest = options.dest } = options
+
         const builder = new Builder()
+
         const cell = builder
             .storeBits([ 1, 0 ]) // ext_in_msg_info$10 constructor
             .storeAddress(src)
@@ -24,38 +40,57 @@ class MsgTemplate {
     }
 
     /**
-     *  Creates a new MessageX
+     * Creates a new simple StateInit without split_depth, special and library
      */
-    public static MessageX (info: Cell, init: Cell | null, body: Cell | null): Cell {
+    public static StateInit (options: StateInitOptions): Cell {
+        const { code = options.code, data = options.data } = options
         const builder = new Builder()
 
-        builder.storeBits(info.bits)
+        builder.storeBits([ 0, 0, 1 ]) // split_depth: 0, special: 0, code: 1
+        builder.storeRef(code)
+
+        if (data) {
+            builder.storeBit(1) // data: 1
+            builder.storeRef(data)
+        } else {
+            builder.storeBit(0) // data: 0
+        }
+
+        builder.storeBit(0) // library: null (0 bit)
+
+        return builder.cell()
+    }
+
+    /**
+     *  Creates a new MessageX
+     */
+    public static MessageX (options: MessageXOptions): Cell {
+        const { info = options.info, init = options.init, body = options.body } = options
+
+        const builder = new Builder()
+        builder.storeSlice(info.toSlice())
 
         if (init) {
-            builder.storeBit(1) // Maybe bit
+            builder.storeBit(1)
 
             // -1 because we need at least 1 bit for the body
             if (builder.remainder - 1 >= init.bits.length) {
-                builder.storeBit(0) // Either bit
-                    .storeBits(init.bits)
+                builder.storeBit(0).storeSlice(init.toSlice())
             } else {
-                builder.storeBit(0) // Either bit
-                    .storeRef(init)
+                builder.storeBit(1).storeRef(init)
             }
         } else {
-            builder.storeBit(0) // Maybe bit
+            builder.storeBit(0)
         }
 
         if (body) {
-            if (builder.remainder >= init.bits.length) {
-                builder.storeBit(0) // Either bit
-                    .storeBits(body.bits)
+            if (builder.remainder >= body.bits.length) {
+                builder.storeBit(0).storeSlice(body.toSlice())
             } else {
-                builder.storeBit(1) // Either bit
-                    .storeRef(body)
+                builder.storeBit(1).storeRef(body)
             }
         } else {
-            builder.storeBit(0) // minimum body bit
+            builder.storeBit(0)
         }
 
         return builder.cell()

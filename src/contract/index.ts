@@ -1,5 +1,3 @@
-import {MsgTemplate} from './msg-template'
+import { MsgTemplate } from './msg-template'
 
-export {
-    MsgTemplate
-}
+export { MsgTemplate }

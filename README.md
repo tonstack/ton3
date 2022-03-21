@@ -14,16 +14,20 @@ npm i @tonstack/tontools
 ```
 
 ## How to use
-```ts
-import { BoC } from '@tonstack/tontools'
+```typescript
+import { BOC, Builder, Slice } from '@tonstack/tontools'
 
-const boc = new BoC()
-const cell = boc.refs[0]
+const text = 'Hello, World!'
+const cell = new Builder()
+    .storeString(text)
+    .cell()
 
-cell.bits.writeBits([ 1, 0, 1 ])
+const boc = BOC.toBytesStandard(cell)
+const result = BOC.fromStandard(boc)
+    .parse()
+    .loadString()
 
-// ...
-
+console.log(text === result) // true
 ```
 
 ## Main authors

@@ -68,14 +68,14 @@ class MsgTemplate {
         const { info = options.info, init = options.init, body = options.body } = options
 
         const builder = new Builder()
-        builder.storeSlice(info.toSlice())
+        builder.storeSlice(info.parse())
 
         if (init) {
             builder.storeBit(1)
 
             // -1 because we need at least 1 bit for the body
             if (builder.remainder - 1 >= init.bits.length) {
-                builder.storeBit(0).storeSlice(init.toSlice())
+                builder.storeBit(0).storeSlice(init.parse())
             } else {
                 builder.storeBit(1).storeRef(init)
             }
@@ -85,7 +85,7 @@ class MsgTemplate {
 
         if (body) {
             if (builder.remainder >= body.bits.length) {
-                builder.storeBit(0).storeSlice(body.toSlice())
+                builder.storeBit(0).storeSlice(body.parse())
             } else {
                 builder.storeBit(1).storeRef(body)
             }

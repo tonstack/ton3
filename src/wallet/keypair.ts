@@ -25,11 +25,15 @@ class KeyPair {
 
     public publicKey: Uint8Array
 
+    public nPK: Uint8Array
+
     constructor (passphrase: string = '', mnemonic: string[] = []) {
         this.passphrase = passphrase
-        this.mnemonic = KeyPair.mnemonicFromEntropy(KeyPair.getRandomEntropy()) || mnemonic
+        this.mnemonic = mnemonic || KeyPair.mnemonicFromEntropy(KeyPair.getRandomEntropy())
         this.privateKey = KeyPair.mnemonicToSeed(this.mnemonic, this.passphrase)
         this.publicKey = KeyPair.ed25519PubKeyFromSeed(this.privateKey)
+
+        this.nPK = nacl.sign.keyPair.fromSeed(this.privateKey).secretKey
     }
 
     public static deriveChecksumBits (entropy: Uint8Array): Bit[] {
@@ -55,7 +59,7 @@ class KeyPair {
         const fullBits: Bit[] = entropyBits.concat(checkSumBits)
         const pieces = sliceIntoChunks(fullBits, 11)
 
-        return pieces.map(chunk => bip0039en[ parseInt(chunk.join(''), 2) ])
+        return pieces.map(chunk => bip0039en[parseInt(chunk.join(''), 2)])
     }
 
     public static mnemonicToSeed (mnemonic: string[], passphrase: string): Uint8Array {

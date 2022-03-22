@@ -10,7 +10,6 @@ describe('BOC', () => {
     const BOC_FIFT_BYTES_LARGE = hexToBytes(BOC_FIFT_HEX_LARGE)
     const BOC_FIFT_BYTES_WITH_DUPS = hexToBytes(BOC_FIFT_HEX_WITH_DUPS)
 
-
     describe('#from()', () => {
         it('should deserialize-serialize-deserialize boc from hex', () => {
             const cells1 = BOC.from(BOC_FIFT_HEX_LARGE)

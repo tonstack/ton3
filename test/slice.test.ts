@@ -1,6 +1,5 @@
 import { expect } from 'chai'
-import { Builder } from '../src/boc/builder'
-import { Slice } from '../src/boc/slice'
+import { Builder, Slice } from '../src/boc'
 import { stringToBytes } from '../src/utils/helpers'
 import { Address } from '../src/address'
 import { Coins } from '../src/coins'
@@ -357,7 +356,7 @@ describe('Slice', () => {
 
     describe('#loadAddress()', () => {
         it('should load Address', () => {
-            const raw = '0:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
+            const raw = '-1:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
             const address = new Address(raw)
 
             builder.storeAddress(address)

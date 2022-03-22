@@ -3,9 +3,10 @@ import type { Bit } from './builder'
 import { Coins } from '../coins'
 import { Address } from '../address'
 import {
+    bitsToHex,
+    bitsToInt8,
     bitsToBytes,
-    bytesToString,
-    bitsToHex
+    bytesToString
 } from '../utils/helpers'
 
 class Slice {
@@ -305,13 +306,13 @@ class Slice {
             // Splice 2 because we dont need flag bits
             // Anycast is currently unused
             const _anycast = bits.splice(2, 1)
-            const workchain = bits.splice(2, 8)
-            const hash = bits.splice(2, 256)
-            const bytes = bitsToBytes(workchain.concat(hash))
+            const workchain = bitsToInt8(bits.splice(2, 8))
+            const hash = bitsToHex(bits.splice(2, 256))
+            const raw = `${workchain}:${hash}`
 
             return splice
-                ? this.skip(size) && new Address(bytes)
-                : new Address(bytes)
+                ? this.skip(size) && new Address(raw)
+                : new Address(raw)
         }
 
         throw new Error('Slice: bad address flag bits.')

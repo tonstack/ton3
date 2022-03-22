@@ -40,6 +40,10 @@ const bitsToHex = (bits: Bit[]): string => {
     return hex.join('')
 }
 
+const bitsToInt8 = (bits: Bit[]): number => {
+    return uint8toInt8(bytesToUint(bitsToBytes(bits)))
+}
+
 const bitsToBytes = (bits: Bit[]): Uint8Array => {
     if (bits.length === 0) {
         return new Uint8Array()
@@ -132,6 +136,7 @@ export {
     hexToBits,
     hexToBytes,
     bitsToHex,
+    bitsToInt8,
     bitsToBytes,
     bytesToUint,
     bytesCompare,

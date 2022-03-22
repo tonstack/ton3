@@ -46,7 +46,6 @@ class Address {
      * Next formats can be used as constructor argument:
      * - Raw
      * - Base64
-     * - Bytes containing Workchain ID and hash part
      * - Address
      * 
      * @param {(string | Address | Uint8Array)} address
@@ -55,20 +54,18 @@ class Address {
      * ```ts
      * import { Address } from '@tonstack/tontools'
      * 
-     * const bytes = new Uint8Array() // containing Workchain ID and address hash bytes
+     * const bytes = new Uint8Array() // containing workchain and address hash bytes
      * const address = new Address('kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny')
      * 
      * new Address('-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260')
      * new Address('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny')
-     * new Address(bytes)
      * new Address(address)
      * ```
      */
-    constructor (address: string | Address | Uint8Array) {
+    constructor (address: string | Address) {
         const isAddress = Address.isAddress(address)
         const isEncoded = Address.isEncoded(address)
         const isRaw = Address.isRaw(address)
-        const isBytes = Address.isBytes(address)
         let result: AddressData
 
         switch (true) {
@@ -82,10 +79,6 @@ class Address {
                 break
             case isRaw:
                 result = Address.parseRaw(address as string)
-
-                break
-            case isBytes:
-                result = Address.parseBytes(address as Uint8Array)
 
                 break
             default:
@@ -156,10 +149,6 @@ class Address {
         return typeof address === 'string' && re.test(address)
     }
 
-    private static isBytes (address: any): boolean {
-        return ArrayBuffer.isView(address) && address.byteLength === 33 
-    }
-
     private static parseEncoded (value: string): AddressData {
         const bytes = base64ToBytes(value)
         const data = Array.from(bytes)
@@ -202,21 +191,6 @@ class Address {
         const data = value.split(':')
         const workchain = parseInt(data[0], 10)
         const hash = hexToBytes(data[1])
-        const bounceable = false
-        const testOnly = false
-
-        return {
-            bounceable,
-            testOnly,
-            workchain,
-            hash
-        }
-    }
-
-    private static parseBytes (value: Uint8Array): AddressData {
-        const data = Array.from(value)
-        const workchain = uint8toInt8(data.shift())
-        const hash = new Uint8Array(data.splice(0, 32))
         const bounceable = false
         const testOnly = false
 

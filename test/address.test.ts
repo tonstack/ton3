@@ -42,18 +42,6 @@ describe('Address', () => {
             expect(result).to.equal(raw)
         })
 
-        it('should create Address from 33 length bytes', () => {
-            const raw = '0:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
-            const temp = new Address(raw)
-            const hash = Array.from(temp.hash)
-            const worhchain = [ 0 ]
-            const bytes = new Uint8Array(worhchain.concat(hash))
-            const address = new Address(bytes)
-            const result = address.toString('raw')
-
-            expect(result).to.equal(raw)
-        })
-
         it('should throw error from bad input data', () => {
             const result1 = () => new Address('bad_input')
             const result2 = () => new Address('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYInz')

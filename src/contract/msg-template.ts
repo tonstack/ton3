@@ -5,19 +5,19 @@ import { Builder } from '../boc/builder'
 
 interface ExtInMsgInfo$10Options {
     src?: Address | null
-    dest: Address
+    dest?: Address
     importFee?: Coins
 }
 
 interface MessageXOptions {
     info: Cell
-    init: Cell | null
-    body: Cell | null
+    init?: Cell
+    body?: Cell
 }
 
 interface StateInitOptions {
     code: Cell,
-    data: Cell | null
+    data?: Cell
 }
 
 class MsgTemplate {
@@ -25,7 +25,7 @@ class MsgTemplate {
      * Creates a new `CommonMsgInfo` with `ext_in_msg_info$10` prefix
      */
     public static ExtInMsgInfo$10 (options: ExtInMsgInfo$10Options): Cell {
-        const { src = null, importFee = new Coins(0), dest = options.dest } = options
+        const { src = null, dest = null, importFee = new Coins(0) } = options
 
         const builder = new Builder()
 
@@ -43,7 +43,7 @@ class MsgTemplate {
      * Creates a new simple StateInit without split_depth, special and library
      */
     public static StateInit (options: StateInitOptions): Cell {
-        const { code = options.code, data = options.data } = options
+        const { code = options.code, data } = options
         const builder = new Builder()
 
         builder.storeBits([ 0, 0, 1 ]) // split_depth: 0, special: 0, code: 1
@@ -65,7 +65,7 @@ class MsgTemplate {
      *  Creates a new MessageX
      */
     public static MessageX (options: MessageXOptions): Cell {
-        const { info = options.info, init = options.init, body = options.body } = options
+        const { info = options.info, init, body } = options
 
         const builder = new Builder()
         builder.storeSlice(info.parse())

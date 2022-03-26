@@ -1,12 +1,12 @@
-import { Builder } from '../boc/builder'
-import { Cell, BOC } from '../boc'
-import { MsgTemplate } from './msg-template'
-import { Address } from '../address'
-import { hexToBytes } from '../utils/helpers'
-import { nacl } from '../utils/crypto'
-import { KeyPairStruct } from '../wallet/mnemonic'
+import { Builder } from '../../boc/builder'
+import { Cell, BOC } from '../../boc'
+import { MsgTemplate } from '../msg-template'
+import { Address } from '../../address'
+import { hexToBytes } from '../../utils/helpers'
+import { nacl } from '../../utils/crypto'
+import { KeyPairStruct } from '../../wallet/mnemonic'
 
-class WalletContract {
+class WalletV3Contract {
     public workchain: number
 
     public subWalletID: number
@@ -28,6 +28,7 @@ class WalletContract {
         this.subWalletID = subWalletID
         this.keyPair = keyPair
 
+        // TODO: check source code and pase the link into comment
         this.code = BOC.fromStandard('B5EE9C724101010100710000DEFF0020DD2082014C97BA218201339CBAB19F71B0ED44D0D31FD31F31D70BFFE304E0A4F2608308D71820D31FD31FD31FF82313BBF263ED44D0D31FD31FD3FFD15132BAF2A15144BAF2A204F901541055F910F2A3F8009320D74A96D307D402FB00E8D101A4C8CB1FCB1FCBFFC9ED5410BD6DAD')
 
         const initStorage = new Builder()
@@ -62,4 +63,4 @@ class WalletContract {
     }
 }
 
-export { WalletContract }
+export { WalletV3Contract }

@@ -1,4 +1,4 @@
 import { MsgTemplate } from './msg-template'
-import { WalletContract } from './wallet'
+import { WalletV3Contract } from './wallets/wallet'
 
-export { MsgTemplate, WalletContract }
+export { MsgTemplate, WalletV3Contract }

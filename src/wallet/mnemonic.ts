@@ -1,17 +1,16 @@
 import { Bit } from '../boc/builder'
 import {
     bytesToBits,
-    bytesToHex,
     hexToBytes,
+    hexToBits,
     sliceIntoChunks
 } from '../utils/helpers'
 import {
     bip0039en,
-    encoderHex,
+    hash,
     algo,
     nacl,
-    pbkdf2,
-    sha256
+    pbkdf2
 } from '../utils/crypto'
 
 const PBKDF2_ROUNDS = 2048 // according to bip39
@@ -97,11 +96,10 @@ class Mnemonic {
 
     private static deriveChecksumBits (entropy: Uint8Array): Bit[] {
         const CS = (entropy.length * 8) / 32
-        const entropyInHex = bytesToHex(entropy)
-        const sha256HashResult = sha256(encoderHex.parse(entropyInHex))
-        const hashInBits = bytesToBits(hexToBytes(sha256HashResult.toString()))
+        const hex = hash(entropy, 'sha256')
+        const bits = hexToBits(hex)
 
-        return hashInBits.slice(0, CS)
+        return bits.slice(0, CS)
     }
 
     private setRandomEntropy () {

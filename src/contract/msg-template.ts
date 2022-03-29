@@ -3,8 +3,21 @@ import { Coins } from '../coins'
 import { Cell } from '../boc/cell'
 import { Builder } from '../boc/builder'
 
+interface IntMsgInfo$0Options {
+    ihrDisabled?: boolean // optional, because it is not currently implemented in TON
+    bounce: boolean // bounce flag
+    bounced?: boolean
+    src: Address
+    dest: Address
+    value: Coins // now is Coins, in future maybe CurrencyCollection
+    ihrFee?: Coins
+    fwdFee?: Coins
+    createdLt?: number
+    createdAt?: number
+}
+
 interface ExtInMsgInfo$10Options {
-    src?: Address | null
+    src?: Address
     dest?: Address
     importFee?: Coins
 }
@@ -22,10 +35,41 @@ interface StateInitOptions {
 
 class MsgTemplate {
     /**
+     * Creates a new `CommonMsgInfo` with `int_msg_info$0` prefix
+     */
+    public static IntMsgInfo$0 (options: IntMsgInfo$0Options): Cell {
+        const zeroCoins = new Coins(0)
+
+        const {
+            ihrDisabled = true, bounce, bounced = false,
+            src, dest,
+            value, ihrFee = zeroCoins, fwdFee = zeroCoins,
+            createdLt = 0, createdAt = 0
+        } = options
+
+        const builder = new Builder()
+
+        builder.storeBit(0) // int_msg_info$0
+            .storeInt(ihrDisabled ? -1 : 0, 1) // ihr_disabled; true: -1
+            .storeInt(bounce ? -1 : 0, 1)
+            .storeInt(bounced ? -1 : 0, 1)
+            .storeAddress(src)
+            .storeAddress(dest)
+            .storeCoins(value)
+            .storeBit(0) // empty ExtraCurrencyCollection dict is 0 bit
+            .storeCoins(ihrFee)
+            .storeCoins(fwdFee)
+            .storeUint(createdLt, 64)
+            .storeUint(createdAt, 32)
+
+        return builder.cell()
+    }
+
+    /**
      * Creates a new `CommonMsgInfo` with `ext_in_msg_info$10` prefix
      */
     public static ExtInMsgInfo$10 (options: ExtInMsgInfo$10Options): Cell {
-        const { src = null, dest = null, importFee = new Coins(0) } = options
+        const { src = Address.NULL, dest = Address.NULL, importFee = new Coins(0) } = options
 
         const builder = new Builder()
 

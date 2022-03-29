@@ -38,18 +38,22 @@ class MsgTemplate {
      * Creates a new `CommonMsgInfo` with `int_msg_info$0` prefix
      */
     public static IntMsgInfo$0 (options: IntMsgInfo$0Options): Cell {
-        const zeroCoins = new Coins(0)
-
+        const builder = new Builder()
         const {
-            ihrDisabled = true, bounce, bounced = false,
-            src, dest,
-            value, ihrFee = zeroCoins, fwdFee = zeroCoins,
-            createdLt = 0, createdAt = 0
+            ihrDisabled = true,
+            bounce,
+            bounced = false,
+            src,
+            dest,
+            value,
+            ihrFee = new Coins(0),
+            fwdFee = new Coins(0),
+            createdLt = 0,
+            createdAt = 0
         } = options
 
-        const builder = new Builder()
-
-        builder.storeBit(0) // int_msg_info$0
+        return builder
+            .storeBit(0) // int_msg_info$0
             .storeInt(ihrDisabled ? -1 : 0, 1) // ihr_disabled; true: -1
             .storeInt(bounce ? -1 : 0, 1)
             .storeInt(bounced ? -1 : 0, 1)
@@ -61,26 +65,26 @@ class MsgTemplate {
             .storeCoins(fwdFee)
             .storeUint(createdLt, 64)
             .storeUint(createdAt, 32)
-
-        return builder.cell()
+            .cell()
     }
 
     /**
      * Creates a new `CommonMsgInfo` with `ext_in_msg_info$10` prefix
      */
     public static ExtInMsgInfo$10 (options: ExtInMsgInfo$10Options): Cell {
-        const { src = Address.NULL, dest = Address.NULL, importFee = new Coins(0) } = options
-
         const builder = new Builder()
+        const {
+            src = Address.NULL,
+            dest = Address.NULL,
+            importFee = new Coins(0)
+        } = options
 
-        const cell = builder
+        return builder
             .storeBits([ 1, 0 ]) // ext_in_msg_info$10 constructor
             .storeAddress(src)
             .storeAddress(dest)
             .storeCoins(importFee)
             .cell()
-
-        return cell
     }
 
     /**
@@ -109,35 +113,45 @@ class MsgTemplate {
      *  Creates a new MessageX
      */
     public static MessageX (options: MessageXOptions): Cell {
-        const { info = options.info, init, body } = options
+        const { info, init, body } = options
+        const message = new Builder()
 
-        const builder = new Builder()
-        builder.storeSlice(info.parse())
+        message.storeSlice(info.parse())
 
         if (init) {
-            builder.storeBit(1)
+            message.storeBit(1)
 
-            // -1 because we need at least 1 bit for the body
-            if (builder.remainder - 1 >= init.bits.length) {
-                builder.storeBit(0).storeSlice(init.parse())
+            if (
+                // We need at least 1 bit for the body
+                message.remainder >= init.bits.length + 1
+                && message.refs.length + init.refs.length <= 4
+            ) {
+                message.storeBit(0)
+                    .storeSlice(init.parse())
             } else {
-                builder.storeBit(1).storeRef(init)
+                message.storeBit(1)
+                    .storeRef(init)
             }
         } else {
-            builder.storeBit(0)
+            message.storeBit(0)
         }
 
         if (body) {
-            if (builder.remainder >= body.bits.length) {
-                builder.storeBit(0).storeSlice(body.parse())
+            if (
+                message.remainder >= body.bits.length
+                && message.refs.length + body.refs.length <= 4
+            ) {
+                message.storeBit(0)
+                    .storeSlice(body.parse())
             } else {
-                builder.storeBit(1).storeRef(body)
+                message.storeBit(1)
+                    .storeRef(body)
             }
         } else {
-            builder.storeBit(0)
+            message.storeBit(0)
         }
 
-        return builder.cell()
+        return message.cell()
     }
 }
 

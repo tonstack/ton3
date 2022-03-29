@@ -1,3 +1,3 @@
-import { KeyPair } from './keypair'
+import { Mnemonic } from './mnemonic'
 
-export { KeyPair }
+export { Mnemonic }

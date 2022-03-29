@@ -98,6 +98,9 @@ class HighloadWalletV2Contract {
         const serializers = {
             key: (k: number): Bit[] => new Builder().storeUint(k, 16).bits,
             value: (v: HighloadWalletV2Transfer): Cell => {
+                const value = new Builder()
+                value.storeUint(v.mode, 8) // mode
+
                 const info = new Builder()
                     .storeUint(v.mode, 8)
                     .storeRef(MsgTemplate.IntMsgInfo$0({
@@ -109,7 +112,8 @@ class HighloadWalletV2Contract {
 
                 const body = new Builder().storeUint(0, 32).storeString(v.comment).cell()
 
-                return MsgTemplate.MessageX({ info, body })
+                value.storeRef(MsgTemplate.MessageX({ info, body }))
+                return value.cell()
             }
         }
 

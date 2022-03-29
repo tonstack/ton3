@@ -47,7 +47,13 @@
     "url": "git+https://github.com/tonstack/tontools-js.git"
   },
   "keywords": [
-    "ton"
+    "ton",
+    "boc",
+    "cell",
+    "api",
+    "adnl",
+    "liteserver",
+    "blockchain"
   ],
   "bugs": {
     "url": "https://github.com/tonstack/tontools-js/issues"

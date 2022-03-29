@@ -1,0 +1,43 @@
+/node_modules
+/src
+
+# Typescript
+tsconfig*.json
+dist/tsconfig.build.tsbuildinfo
+
+# Docs
+/docs
+typedoc.json
+
+# Tests
+/coverage
+/test
+.nycrc.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.eslintrc.json
+
+# IDE - VSCode
+.vscode

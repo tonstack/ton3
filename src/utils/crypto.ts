@@ -5,6 +5,7 @@ import pbkdf2 from 'crypto-js/pbkdf2'
 import { algo } from 'crypto-js'
 import encoderHex from 'crypto-js/enc-hex'
 import * as bip0039en from './bip-0039-en.json'
+import { bytesToHex } from './helpers'
 
 const crc16 = (data: Uint8Array | number[]): number => {
     const POLY = 0x1021
@@ -62,14 +63,22 @@ const crc32cBytesLe = (data: Uint8Array | number[]): Uint8Array => {
     return new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
 }
 
+const hash = (bytes: Uint8Array, type: 'sha256' | 'sha512'): string => {
+    const hex = bytesToHex(bytes)
+    const words = encoderHex.parse(hex)
+    const hash = type === 'sha256'
+        ? sha256(words).toString()
+        : sha512(words).toString()
+
+    return hash
+}
+
 export {
     nacl,
     algo,
-    sha256,
-    sha512,
+    hash,
     pbkdf2,
     crc16BytesBe,
     crc32cBytesLe,
-    encoderHex,
     bip0039en
 }

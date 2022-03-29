@@ -4,13 +4,11 @@ import {
 } from './builder'
 import { Slice } from './slice'
 import {
+    bitsToBytes,
     bitsToHex,
     hexToBits
 } from '../utils/helpers'
-import {
-    sha256,
-    encoderHex
-} from '../utils/crypto'
+import { hash } from '../utils/crypto'
 
 class Cell {
     private _bits: Bit[]
@@ -108,17 +106,16 @@ class Cell {
     }
 
     public hash (): string {
-        const hex = bitsToHex(this.representation)
-        const hash = sha256(encoderHex.parse(hex))
+        const bytes = bitsToBytes(this.representation)
 
-        return hash.toString()
+        return hash(bytes, 'sha256')
     }
 
     public print (indent: string = ''): string {
         const bits = Array.from(this._bits)
         const areDivisible = bits.length % 4 === 0
         const augmented = !areDivisible ? Builder.augmentBits(bits, 4) : bits
-        const fiftHex = `${bitsToHex(augmented).toUpperCase()}${areDivisible ? '_' : ''}`
+        const fiftHex = `${bitsToHex(augmented).toUpperCase()}${!areDivisible ? '_' : ''}`
         const output = [ `${indent}x{${fiftHex}}\n` ]
 
         this._refs.forEach(ref => output.push(ref.print(`${indent} `)))

@@ -1,17 +1,16 @@
 import { Bit } from '../boc/builder'
 import {
     bytesToBits,
-    bytesToHex,
+    hexToBits,
     hexToBytes,
     sliceIntoChunks
 } from '../utils/helpers'
 import {
     bip0039en,
-    encoderHex,
     algo,
     nacl,
     pbkdf2,
-    sha256
+    hash
 } from '../utils/crypto'
 
 const PBKDF2_ROUNDS = 2048
@@ -34,11 +33,9 @@ class KeyPair {
 
     public static deriveChecksumBits (entropy: Uint8Array): Bit[] {
         const CS = (entropy.length * 8) / 32
-        const entropyInHex = bytesToHex(entropy)
-        const sha256HashResult = sha256(encoderHex.parse(entropyInHex))
-        const hashInBits = bytesToBits(hexToBytes(sha256HashResult.toString()))
+        const result = hash(entropy, 'sha256')
 
-        return hashInBits.slice(0, CS)
+        return hexToBits(result).slice(0, CS)
     }
 
     public static getRandomEntropy (): Uint8Array {

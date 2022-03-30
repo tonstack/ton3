@@ -1,31 +1,19 @@
-import { Coins } from '../../coins'
 import { Builder } from '../../boc/builder'
 import { Cell, BOC } from '../../boc'
 import { MsgTemplate } from '../msg-template'
 import { Address } from '../../address'
-import { hexToBytes } from '../../utils/helpers'
-import { nacl } from '../../utils/crypto'
 import { KeyPairStruct } from '../../wallet/mnemonic'
-import { Wallet } from './wallet'
-
-interface WalletV3Transfer {
-    destination: Address
-    amount: Coins
-    body: Cell
-    mode: number
-}
-
-const WalletV3ContractErrors = { transfersOverflow: 'transfersOverflow: WalletV3 transfers must be <= 4' }
+import { Wallet, WalletTransfer } from './wallet'
 
 class WalletV3Contract extends Wallet {
-    private _transfers: WalletV3Transfer[]
-
     constructor (
         workchain: number,
         subWalletID: number,
         keyPair: KeyPairStruct
     ) {
         super()
+        this.errors = { transfersOverflow: 'transfersOverflow: WalletV3 transfers must be <= 4' }
+
         this.workchain = workchain
         this._subWalletID = subWalletID
         this._keyPair = keyPair
@@ -46,29 +34,11 @@ class WalletV3Contract extends Wallet {
         this._address = new Address(`${this.workchain}:${this._stateInit.hash()}`)
     }
 
-    public get transfers (): WalletV3Transfer[] {
-        return this._transfers
-    }
-
-    public addTransfers (transfers: WalletV3Transfer[]): void {
+    public addTransfers (transfers: WalletTransfer[]): void {
         if ((this._transfers.length + transfers.length) > 4) {
-            throw new Error(WalletV3ContractErrors.transfersOverflow)
+            throw new Error(this.errors.transfersOverflow)
         }
         transfers.forEach((t) => { this._transfers.push(t) })
-    }
-
-    private signMsg (cell: Cell): Uint8Array {
-        return nacl.sign.detached(
-            hexToBytes(cell.hash()),
-            this._keyPair.privateKey.full
-        )
-    }
-
-    private addSign (msg: Cell): Cell {
-        return new Builder()
-            .storeBytes(this.signMsg(msg))
-            .storeSlice(msg.parse())
-            .cell()
     }
 
     private sigMessageB (validUntil: number, seqno: number): Builder {
@@ -87,10 +57,6 @@ class WalletV3Contract extends Wallet {
         return msg
     }
 
-    public cleanUpTransfers (): void {
-        this._transfers = []
-    }
-
     public static simpleTextMsg (text: string): Cell {
         return new Builder().storeUint(0, 32).storeString(text).cell()
     }
@@ -100,7 +66,10 @@ class WalletV3Contract extends Wallet {
         timeout: number = 60,
         cleanUp: boolean = true
     ): Cell {
-        const msg = this.sigMessageB(~~(Date.now() / 1000) + timeout, seqno)
+        const msg = new Builder()
+            .storeUint(this._subWalletID, 32)
+            .storeUint(~~(Date.now() / 1000) + timeout, 32) // valid until
+            .storeUint(seqno, 32)
 
         this._transfers.forEach((t) => {
             msg.storeUint(t.mode, 8)
@@ -115,9 +84,7 @@ class WalletV3Contract extends Wallet {
             }))
         })
 
-        if (cleanUp) {
-            this.cleanUpTransfers()
-        }
+        if (cleanUp) { this.cleanUpTransfers() }
 
         return MsgTemplate.MessageX({
             info: MsgTemplate.ExtInMsgInfo$10({ dest: this._address }),
@@ -130,9 +97,15 @@ class WalletV3Contract extends Wallet {
         return MsgTemplate.MessageX({
             info: MsgTemplate.ExtInMsgInfo$10({ dest: this._address }),
             init: this._stateInit,
-            body: this.addSign(this.sigMessageB(-1, 0).cell())
+            body: this.addSign(
+                new Builder()
+                    .storeUint(this._subWalletID, 32)
+                    .storeInt(-1, 32) // valid until
+                    .storeUint(0, 32) // seqno
+                    .cell()
+            )
         })
     }
 }
 
-export { WalletV3Contract, WalletV3Transfer, WalletV3ContractErrors }
+export { WalletV3Contract }

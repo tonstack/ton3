@@ -22,7 +22,7 @@ describe('Some', () => {
         access.generate()
 
         const myWallet = new HighloadWalletV2Contract(0, 25, access.thisKeyPair)
-        for (let i: number = 0; i < 10; i++) {
+        for (let i: number = 0; i < 254; i++) {
             myWallet.addTransfers([
                 {
                     destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
@@ -37,6 +37,8 @@ describe('Some', () => {
         console.log(myWallet.address.toString('base64', true))
 
         console.log(`\n${BOC.toHexStandard(myWallet.sendTransfersExtMsg())}\n`)
+
+        expect(1).to.equal(1)
     })
 
     // it('transfer', () => {

@@ -16,10 +16,10 @@
         "sourceMap": true,
         "outDir": "./dist",
         "baseUrl": "./src",
-        "incremental": true,
-        "paths": {
-            "*": ["./types/*.d.ts"]
-        }
+        "incremental": true
+    },
+    "ts-node": {
+        "transpileOnly": true
     },
     "include": ["./**/*.ts"],
     "exclude": ["node_modules", "dist"]

@@ -7,8 +7,6 @@ import {
     stringToBytes
 } from '../utils/helpers'
 
-type Bit = 0 | 1
-
 class Builder {
     private _size: number
 
@@ -96,26 +94,25 @@ class Builder {
 
     /**
      * Merge {@link Slice} into instance.
-     * 
+     *
      * @param {Slice} slice - An instance of a {@link Slice}.
      * @return {this}
      */
     public storeSlice (slice: Slice): this {
-        const bits = slice.bits
-        const refs = slice.refs
+        const { bits, refs } = slice
 
         this.checkBitsOverflow(bits.length)
         this.checkRefsOverflow(refs.length)
         this.storeBits(bits)
 
-        refs.forEach((ref) => this.storeRef(ref))
+        refs.forEach(ref => this.storeRef(ref))
 
         return this
     }
 
     /**
      * Add cell to instance refs
-     * 
+     *
      * @param {Cell} ref - Cell
      * @return {this}
      */
@@ -128,7 +125,7 @@ class Builder {
 
     /**
      * Store one bit in instance.
-     * 
+     *
      * @param {(Bit | number)} bit - 1 or 0.
      * @return {this}
      */
@@ -145,7 +142,7 @@ class Builder {
 
     /**
      * Store multiple bits as array in instance.
-     * 
+     *
      * @param {(Bit[] | number[])} bits - Array of 1 and/or 0.
      * @return {this}
      */
@@ -159,7 +156,7 @@ class Builder {
 
     /**
      * Store an integer in instance.
-     * 
+     *
      * @param {(number | bigint)} value - Int.
      * @param {number} size - Size in bits of allocated space for value.
      * @return {this}
@@ -179,7 +176,7 @@ class Builder {
 
     /**
      * Store an unsigned integer in instance.
-     * 
+     *
      * @param {(number | bigint)} value - UInt.
      * @param {number} size - Size in bits of allocated space for value.
      * @return {this}
@@ -198,7 +195,7 @@ class Builder {
 
     /**
      * Store a bytes array in instance.
-     * 
+     *
      * @param {(Uint8Array | number[])} value - Array of bytes.
      * @return {this}
      */
@@ -212,7 +209,7 @@ class Builder {
 
     /**
      * Store a string in instance.
-     * 
+     *
      * @param {string} value - Any string, Unicode is suppported.
      * @return {this}
      */
@@ -226,7 +223,7 @@ class Builder {
 
     /**
      * Store an {@link Address} in instance.
-     * 
+     *
      * @param {(Address | null)} address - Smart contract address as {@link Address} or as null.
      * @return {this}
      */
@@ -251,7 +248,7 @@ class Builder {
 
     /**
      * Store a {@link Coins} in instance.
-     * 
+     *
      * @param {Coins} coins - Toncoin as {@link Coins}.
      * @return {this}
      */
@@ -280,7 +277,7 @@ class Builder {
 
     /**
      * Returns this instance copy as a new instance.
-     * 
+     *
      * @return {Builder}
      */
     public clone (): Builder {
@@ -294,52 +291,14 @@ class Builder {
     }
 
     /**
-     * Augment bits with 1 and leading 0 to be divisible by 8 or 4 without remainder.
-     * Mostly used for {@link BoC} serialization or {@link Cell} hash calculations.
-     * 
-     * @param {Bit[]} bits - Bits which need to be augmented.
-     * @param {(4 | 8)} [divider=8] - A divider after division by which there will be no remainder.
-     * @return {Bit[]}
-     */
-    public static augmentBits (bits: Bit[], divider: 4 | 8 = 8): Bit[] {
-        const amount = divider - (bits.length % divider)
-        const overage = [ ...Array(amount) ].map((_el, i) => (i === 0 ? 1 : 0))
-
-        if (overage.length !== 0 && overage.length !== divider) {
-            bits = bits.concat(overage)
-        }
-
-        return bits
-    }
-
-    /**
-     * Remove augmented bits.
-     * Mostly used for {@link BoC} serialization or {@link Cell} hash calculations.
-     * 
-     * @param {Bit[]} bits - Bits which needs to be cleared from augmented bits.
-     * @return {this}
-     */
-    public static rollbackBits (bits: Bit[]): Bit[] {
-        const index = bits.slice(-7).reverse().indexOf(1)
-
-        if (index === -1) {
-            throw new Error('Builder: incorrectly augmented bits.')
-        }
-
-        bits.splice(-(index + 1))
-
-        return bits
-    }
-
-    /**
      * Returns builded {@link Cell}.
-     * 
+     *
      * @return {Cell}
-     * 
+     *
      * @example
      * ```typescript
      * import { Builder } from '@tonstack/tontools'
-     * 
+     *
      * const bits = [ 1, 0, 0, 1 ]
      * const cell = new Builder(bits.length)
      *     .storeBits(bits)
@@ -354,7 +313,4 @@ class Builder {
     }
 }
 
-export {
-    Builder,
-    Bit
-}
+export { Builder }

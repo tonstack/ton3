@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { TextEncoder } from 'util'
-import { Cell, Builder, Bit } from '../src/boc'
+import { Cell, Builder } from '../src/boc'
 import { bytesToBits } from '../src/utils/helpers'
 import { Address } from '../src/address'
 import { Coins } from '../src/coins'
@@ -102,7 +102,6 @@ describe('Builder', () => {
         })
     })
 
-
     describe('#storeSlice()', () => {
         it('should store Slice', () => {
             const ref = new Builder().cell()
@@ -182,7 +181,7 @@ describe('Builder', () => {
 
         it('should throw error on bad data', () => {
             // @ts-ignore
-            const result1 = () => builder.storeBit("1")
+            const result1 = () => builder.storeBit('1')
             // @ts-ignore
             const result2 = () => builder.storeBit(-1)
             // @ts-ignore
@@ -336,7 +335,6 @@ describe('Builder', () => {
             expect(result.bits.length).to.eq(builder.bits.length)
             expect(result.refs).to.eql(builder.refs)
             expect(result.refs.length).to.eq(builder.refs.length)
-            
 
             builder.storeBits([ 0, 1 ])
                 .storeRef(ref)
@@ -353,7 +351,7 @@ describe('Builder', () => {
             const bits = [ 1, 0, 1, 0, 1, 0, 1, 0, 1 ] as Bit[]
             const result1 = Builder.augmentBits(bits)
             const result2 = Builder.augmentBits(bits, 8)
-            const result3= Builder.augmentBits(bits, 4)
+            const result3 = Builder.augmentBits(bits, 4)
 
             expect(result1).to.eql([ ...bits, ...[ 1, 0, 0, 0, 0, 0, 0 ] ])
             expect(result2).to.eql([ ...bits, ...[ 1, 0, 0, 0, 0, 0, 0 ] ])

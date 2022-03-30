@@ -1,13 +1,10 @@
-import {
-    Bit,
-    Builder
-} from './builder'
 import { Slice } from './slice'
 import {
     bitsToBytes,
     bitsToHex,
     hexToBits
 } from '../utils/helpers'
+import { augment } from '../utils/bits'
 import { hash } from '../utils/crypto'
 
 class Cell {
@@ -44,15 +41,16 @@ class Cell {
     }
 
     private get refsDescriptor (): Bit[] {
-        const refs = this._refs.length + (Number(this._exotic) * 8) + (this.calculateMaxLevel() * 32)
-        const bits = refs.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
+        const maxLevel = this.calculateMaxLevel()
+        const value = this._refs.length + (this._exotic ? 1 : 0 * 8) + (maxLevel * 32)
+        const bits = value.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
     }
 
     private get bitsDescriptor (): Bit[] {
-        const cap = Math.ceil(this._bits.length / 8) + Math.floor(this._bits.length / 8)
-        const bits = cap.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
+        const value = Math.ceil(this._bits.length / 8) + Math.floor(this._bits.length / 8)
+        const bits = value.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits
     }
@@ -67,8 +65,8 @@ class Cell {
         })
 
         this._refs.forEach((ref) => {
-            const hash = ref.hash()
-            const bits = hexToBits(hash)
+            const hex = ref.hash()
+            const bits = hexToBits(hex)
 
             representation = [ ...representation, ...bits ]
         })
@@ -102,7 +100,7 @@ class Cell {
     }
 
     public get augmentedBits (): Bit[] {
-        return Builder.augmentBits(this._bits)
+        return augment(this._bits)
     }
 
     public hash (): string {
@@ -114,7 +112,7 @@ class Cell {
     public print (indent: string = ''): string {
         const bits = Array.from(this._bits)
         const areDivisible = bits.length % 4 === 0
-        const augmented = !areDivisible ? Builder.augmentBits(bits, 4) : bits
+        const augmented = !areDivisible ? augment(bits, 4) : bits
         const fiftHex = `${bitsToHex(augmented).toUpperCase()}${!areDivisible ? '_' : ''}`
         const output = [ `${indent}x{${fiftHex}}\n` ]
 

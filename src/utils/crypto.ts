@@ -10,8 +10,8 @@ import { bytesToHex } from './helpers'
 const crc16 = (data: Uint8Array | number[]): number => {
     const POLY = 0x1021
     const bytes = new Uint8Array(data)
-    const result = bytes.reduce((crc, el) => {
-        crc = crc ^ (el << 8)
+    const result = bytes.reduce((acc, el) => {
+        let crc = acc ^ (el << 8)
 
         new Array(8).fill(0).forEach(() => {
             crc = (crc & 0x8000) === 0x8000
@@ -39,8 +39,8 @@ const crc16BytesBe = (data: Uint8Array | number[]): Uint8Array => {
 const crc32c = (data: Uint8Array | number[]): number => {
     const POLY = 0x82f63b78
     const bytes = new Uint8Array(data)
-    const result = [ ...Array(bytes.length) ].reduce((crc, _el, i) => {
-        crc = i === 0 ? 0xffffffff ^ bytes[i] : crc ^ bytes[i]
+    const result = [ ...Array(bytes.length) ].reduce((acc, _el, i) => {
+        let crc = i === 0 ? 0xffffffff ^ bytes[i] : acc ^ bytes[i]
 
         new Array(8).fill(0).forEach(() => {
             crc = crc & 1 ? (crc >>> 1) ^ POLY : crc >>> 1
@@ -66,11 +66,11 @@ const crc32cBytesLe = (data: Uint8Array | number[]): Uint8Array => {
 const hash = (bytes: Uint8Array, type: 'sha256' | 'sha512'): string => {
     const hex = bytesToHex(bytes)
     const words = encoderHex.parse(hex)
-    const hash = type === 'sha256'
+    const result = type === 'sha256'
         ? sha256(words).toString()
         : sha512(words).toString()
 
-    return hash
+    return result
 }
 
 export {

@@ -5,16 +5,16 @@ class Coins {
 
     /**
      * Creates an instance of {@link Coins}
-     * 
+     *
      * @param {(Coins | bigint | number | string)} value
      * @param {boolean} [isNano=false] - Is argument value represented in nanocoins
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('100')
-     * 
+     *
      * new Coins(coins)
      * new Coins(BigInt('100'))
      * new Coins(100)
@@ -35,16 +35,16 @@ class Coins {
      * Add value to instance value
      *
      * @param {(Coins | bigint | number | string)} value
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10').add(9)
-     * 
+     *
      * console.log(coins.toString()) // '19'
      * ```
-     * 
+     *
      * @return {Coins} - Current instance reference
      */
     public add (value: Coins | bigint | number | string): Coins {
@@ -61,16 +61,16 @@ class Coins {
      * Subtract value from instance value
      *
      * @param {(Coins | bigint | number | string)} value
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10').sub(9)
-     * 
+     *
      * console.log(coins.toString()) // '1'
      * ```
-     * 
+     *
      * @return {Coins} - Current instance reference
      */
     public sub (value: Coins | bigint | number | string): Coins {
@@ -87,16 +87,16 @@ class Coins {
      * Multiplies instance value by value
      *
      * @param {(Coins | bigint | number | string)} value
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10').mul(2)
-     * 
+     *
      * console.log(coins.toString()) // '20'
      * ```
-     * 
+     *
      * @return {Coins} - Current instance reference
      */
     public mul (value: Coins | bigint | number | string): Coins {
@@ -113,16 +113,16 @@ class Coins {
      * Divides instance value by value
      *
      * @param {(Coins | bigint | number | string)} value
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10').div(2)
-     * 
+     *
      * console.log(coins.toString()) // '5'
      * ```
-     * 
+     *
      * @return {Coins} - Current instance reference
      */
     public div (value: Coins | bigint | number | string): Coins {
@@ -141,14 +141,14 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10')
      * const equal = new Coins('10')
      * const notEqual = new Coins('11')
-     * 
+     *
      * console.log(equal.eq(coins), notEqual.eq(coins)) // true, false
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public eq (value: Coins): boolean {
@@ -165,14 +165,14 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10')
      * const equal = new Coins('10')
      * const greater = new Coins('11')
-     * 
+     *
      * console.log(equal.gt(coins), greater.gt(coins)) // false, true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public gt (value: Coins): boolean {
@@ -189,14 +189,14 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10')
      * const equal = new Coins('10')
      * const greater = new Coins('11')
-     * 
+     *
      * console.log(equal.gte(coins), greater.gte(coins)) // true, true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public gte (value: Coins): boolean {
@@ -213,14 +213,14 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10')
      * const equal = new Coins('10')
      * const lesser = new Coins('9')
-     * 
+     *
      * console.log(equal.lt(coins), lesser.lt(coins)) // false, true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public lt (value: Coins): boolean {
@@ -237,14 +237,14 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('10')
      * const equal = new Coins('10')
      * const lesser = new Coins('9')
-     * 
+     *
      * console.log(equal.lte(coins), lesser.lte(coins)) // true, true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public lte (value: Coins): boolean {
@@ -261,13 +261,13 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const zero = new Coins('0')
      * const negative = new Coins('-1')
-     * 
+     *
      * console.log(zero.isNegative(), negative.isNegative()) // false, true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public isNegative (): boolean {
@@ -280,13 +280,13 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const zero = new Coins('0')
      * const positive = new Coins('1')
-     * 
+     *
      * console.log(zero.isPositive(), positive.isPositive()) // true, true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public isPositive (): boolean {
@@ -299,12 +299,12 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const zero = new Coins('0')
-     * 
+     *
      * console.log(zero.isZero()) // true
      * ```
-     * 
+     *
      * @return {boolean}
      */
     public isZero (): boolean {
@@ -317,12 +317,12 @@ class Coins {
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('100')
-     * 
+     *
      * console.log(coins.toString()) // '100'
      * ```
-     * 
+     *
      * @return {string}
      */
     public toString (): string {
@@ -336,13 +336,13 @@ class Coins {
 
     /**
      * Returns string representation of instance in nanocoins
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = new Coins('100')
-     * 
+     *
      * console.log(coins.toNano()) // '100000000000'
      * ```
      *
@@ -370,16 +370,16 @@ class Coins {
      *
      * @static
      * @param {(bigint | number | string)} value - Value in nanocoins
-     * 
+     *
      * @example
      * ```ts
      * import { Coins } from '@tonstack/tontools'
-     * 
+     *
      * const coins = Coins.fromNano('100000000000')
-     * 
+     *
      * console.log(coins.toString()) // 100 coins
      * ```
-     * 
+     *
      * @return {Coins}
      */
     public static fromNano (value: bigint | number | string): Coins {

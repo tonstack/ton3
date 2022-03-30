@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { Cell } from './cell'
-import {
-    Bit,
-    Builder
-} from './builder'
+import { Builder } from './builder'
 import {
     uintToHex,
     hexToBits,
@@ -14,6 +11,10 @@ import {
     bitsToBytes,
     bytesToBits
 } from '../utils/helpers'
+import {
+    augment,
+    rollback
+} from '../utils/bits'
 import { crc32cBytesLe } from '../utils/crypto'
 
 const REACH_BOC_MAGIC_PREFIX = hexToBytes('B5EE9C72')
@@ -212,7 +213,7 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
     const [ refsDescriptor, bitsDescriptor ] = remainder.splice(0, 2)
 
     // Exotic cell are currently unsupported
-    const _isExotic = !!(refsDescriptor & 8)
+    // const _isExotic = !!(refsDescriptor & 8)
     const isAugmented = bitsDescriptor % 2 !== 0
     const refNum = refsDescriptor % 8
     const size = Math.ceil(bitsDescriptor / 2)
@@ -222,7 +223,7 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
     }
 
     const bits = isAugmented
-        ? Builder.rollbackBits(bytesToBits(remainder.splice(0, size)))
+        ? rollback(bytesToBits(remainder.splice(0, size)))
         : bytesToBits(remainder.splice(0, size))
 
     const cell = new Builder(bits.length)
@@ -282,7 +283,7 @@ const deserialize = (data: Uint8Array): Cell[] => {
             pointer.cell = builder.cell()
         })
 
-    return root_list.reduce((acc, refIndex) => acc.concat([ pointers[refIndex].cell ]), [] as Cell[])
+    return root_list.reduce((acc, refIndex) => acc.concat([ pointers[refIndex].cell ]), [])
 }
 
 const depthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, number> } => {
@@ -314,6 +315,8 @@ const depthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, numbe
         hashmap.set(hash, stack.length)
         nodes.push({ cell: ref, children: ref.refs.length, scanned: 0 })
         stack.push({ cell: ref, hash })
+
+        return undefined
     }
 
     // Loop through multi-tree and make depth-first search till last node
@@ -368,14 +371,16 @@ const breadthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, num
         hashmap.set(hash, stack.length)
         nodes.push(node)
         stack.push({ cell: node, hash })
+
+        return undefined
     }
 
     // Loop through multi-tree and make breadth-first search till last node
     while (nodes.length) {
-        const length = nodes.length
+        const { length } = nodes
 
         nodes.forEach((node) => {
-            node.refs.forEach((ref) => add(ref))
+            node.refs.forEach(ref => add(ref))
         })
 
         nodes.splice(0, length)
@@ -390,9 +395,9 @@ const breadthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, num
 const serializeCell = (cell: Cell, hashmap: Map<string, number>): Bit[] => {
     const bits = cell.refs.reduce((acc, ref) => {
         const refIndex = hashmap.get(ref.hash())
-        const bits = hexToBits(uintToHex(refIndex))
+        const data = hexToBits(uintToHex(refIndex))
 
-        return acc.concat(bits)
+        return acc.concat(data)
     }, [ ...cell.descriptors, ...cell.augmentedBits ] as Bit[])
 
     return bits
@@ -426,8 +431,15 @@ const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
     const full_size = cells_bits.length / 8
     const offset_bits = full_size.toString(2).length
     const offset_bytes = Math.max(Math.ceil(offset_bits / 8), 1)
-    const result = new Builder((1023 + 32 * 4 + 32 * 3) * cells_list.length)
+    const builder_size = (32 + 3 + 2 + 3 + 8)
+        + (cells_bits.length)
+        + ((size_bytes * 8) * 4)
+        + (offset_bytes * 8)
+        + (has_idx ? (cells_list.length * (offset_bytes * 8)) : 0)
 
+    const result = new Builder(builder_size)
+
+    // TODO: fix more than 1 root cells support
     result.storeBytes(REACH_BOC_MAGIC_PREFIX)
         .storeBit(Number(has_idx))
         .storeBit(Number(hash_crc32))
@@ -436,7 +448,7 @@ const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
         .storeUint(size_bytes, 3)
         .storeUint(offset_bytes, 8)
         .storeUint(cells_num, size_bytes * 8)
-        .storeUint(1, size_bytes * 8) // More than 1 root cell is unsopperted atm
+        .storeUint(root.refs.length, size_bytes * 8)
         .storeUint(0, size_bytes * 8)
         .storeUint(full_size, offset_bytes * 8)
         .storeUint(0, size_bytes * 8)
@@ -447,7 +459,7 @@ const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
         })
     }
 
-    const augmentedBits = Builder.augmentBits(result.storeBits(cells_bits).bits)
+    const augmentedBits = augment(result.storeBits(cells_bits).bits)
     const bytes = bitsToBytes(augmentedBits)
 
     if (hash_crc32) {

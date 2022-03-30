@@ -1,7 +1,6 @@
-import {
-    Bit,
-    Builder
-} from './builder'
+/* eslint-disable max-classes-per-file */
+
+import { Builder } from './builder'
 import { Cell } from './cell'
 
 interface HashmapOptions<K, V> {
@@ -21,21 +20,21 @@ interface HashmapOptions<K, V> {
 type HashmapNode = [ key: Bit[], value: Cell ]
 
 class Hashmap<K = Bit[], V = Cell> {
-    private hashmap: Map<string, Cell>
+    protected hashmap: Map<string, Cell>
 
-    private keySize: number | 'auto'
+    protected keySize: number | 'auto'
 
-    private prefixed: boolean | 'auto'
+    protected prefixed: boolean | 'auto'
 
-    private nonEmpty: boolean
+    protected nonEmpty: boolean
 
-    private serializeKey: (key: K) => Bit[]
+    protected serializeKey: (key: K) => Bit[]
 
-    private serializeValue: (value: V) => Cell
+    protected serializeValue: (value: V) => Cell
 
-    private deserializeKey: (key: Bit[]) => K
+    protected deserializeKey: (key: Bit[]) => K
 
-    private deserializeValue: (value: Cell) => V
+    protected deserializeValue: (value: Cell) => V
 
     constructor (options?: HashmapOptions<K, V>) {
         const {
@@ -57,35 +56,16 @@ class Hashmap<K = Bit[], V = Cell> {
     }
 
     public* [Symbol.iterator] (): IterableIterator<[ K, V ]> {
+        // eslint-disable-next-line no-restricted-syntax
         for (const [ k, v ] of this.hashmap) {
             const key = this.deserializeKey(k.split('').map(b => Number(b) as Bit))
             const value = this.deserializeValue(v)
 
-            yield [ key, value]
+            yield [ key, value ]
         }
     }
 
-    private serialize (): Cell {
-        const { sorted, prefixed } = this.serializeRoots()
-        const result = new Builder()
-
-        if (this.nonEmpty && sorted.length === 0) {
-            throw new Error('Hashmap: non-empty hashmap must contain 1 or more elements.')
-        }
-
-        if (!this.nonEmpty) {
-            result.storeBit(sorted.length > 0 ? 1 : 0)
-        }
-
-        // Is an empty Hashmap
-        if (!this.nonEmpty && sorted.length === 0) {
-            return result.cell()
-        }
-
-        return this.serializeEdge(sorted)
-    }
-
-    private serializeRoots (): { sorted: HashmapNode[], prefixed: boolean } {
+    protected sortHashmap (): { sorted: HashmapNode[], prefixed: boolean } {
         const {
             sorted,
             keySizeMin,
@@ -96,17 +76,17 @@ class Hashmap<K = Bit[], V = Cell> {
             const key = bitstring.split('').map(b => Number(b) as Bit)
             const keyLength = key.length
             const valueLength = value.bits.length
-            const valueHasRefs = value.refs.length !== 0
+            const hasRefs = value.refs.length !== 0
             // Sort keys by DESC to serialize labels correctly later
             const order = parseInt(bitstring, 2)
-            const lt = acc.sorted.findIndex((el) => order > el.order)
+            const lt = acc.sorted.findIndex(el => order > el.order)
             const index = lt > -1 ? lt : acc.sorted.length
 
             acc.sorted.splice(index, 0, { order, key, value })
             acc.keySizeMin = keyLength < acc.keySizeMin ? keyLength : acc.keySizeMin
             acc.keySizeMax = keyLength > acc.keySizeMax ? keyLength : acc.keySizeMax
             acc.valueSizeMax = valueLength > acc.valueSizeMax ? valueLength : acc.valueSizeMax
-            acc.valueHasRefs = !acc.valueHasRefs ? valueHasRefs : acc.valueHasRefs
+            acc.valueHasRefs = !acc.valueHasRefs ? hasRefs : acc.valueHasRefs
 
             return acc
         }, {
@@ -130,7 +110,7 @@ class Hashmap<K = Bit[], V = Cell> {
         }
 
         if (this.prefixed === false && isPrefixHashmapType) {
-            throw new Error(`Hashmap: provided keys and values can fit only in prefixed hashmap.`)
+            throw new Error('Hashmap: provided keys and values can fit only in prefixed hashmap.')
         }
 
         return {
@@ -139,7 +119,17 @@ class Hashmap<K = Bit[], V = Cell> {
         }
     }
 
-    private serializeEdge (nodes: HashmapNode[]): Cell {
+    protected serialize (): Cell {
+        const { sorted } = this.sortHashmap()
+
+        if (sorted.length === 0) {
+            throw new Error('Hashmap: must contain at least 1 key-value pair.')
+        }
+
+        return Hashmap.serializeEdge(sorted)
+    }
+
+    protected static serializeEdge (nodes: HashmapNode[]): Cell {
         // hme_empty$0
         if (!nodes.length) {
             return new Builder()
@@ -177,7 +167,7 @@ class Hashmap<K = Bit[], V = Cell> {
         return edge.cell()
     }
 
-    private serializeFork (nodes: HashmapNode[]): [ HashmapNode[], HashmapNode[] ] {
+    protected static serializeFork (nodes: HashmapNode[]): [ HashmapNode[], HashmapNode[] ] {
         // Serialize nodes to edges
         return nodes.reduce((acc, [ key, value ]) => {
             // Sort nodes by left/right edges
@@ -187,11 +177,11 @@ class Hashmap<K = Bit[], V = Cell> {
         }, [ [], [] ] as [ HashmapNode[], HashmapNode[] ])
     }
 
-    private serializeLeaf (node: HashmapNode): Cell {
+    protected static serializeLeaf (node: HashmapNode): Cell {
         return node[1]
     }
 
-    private serializeLabel (nodes: HashmapNode[]): Bit[] {
+    protected static serializeLabel (nodes: HashmapNode[]): Bit[] {
         // Each label can always be serialized in at least two different fashions, using
         // hml_short or hml_long constructors. Usually the shortest serialization (and
         // in the case of a tie—the lexicographically smallest among the shortest) is
@@ -208,15 +198,15 @@ class Hashmap<K = Bit[], V = Cell> {
 
         if (first[0] !== last[0] || m === 0) {
             // hml_short for zero most possible bits
-            return this.serializeShort([])
+            return this.serializeLabelShort([])
         }
 
         const label = first.slice(0, sameBitsLength)
         const repeated = label.join('').match(/(^0+)|(^1+)/)[0].split('').map(b => Number(b) as Bit)
-        const labelShort = this.serializeShort(label)
-        const labelLong = this.serializeLong(label, m)
+        const labelShort = this.serializeLabelShort(label)
+        const labelLong = this.serializeLabelLong(label, m)
         const labelSame = nodes.length > 1 && repeated.length > 1
-            ? this.serializeSame(repeated, m)
+            ? this.serializeLabelSame(repeated, m)
             : null
 
         const labels = [
@@ -237,42 +227,53 @@ class Hashmap<K = Bit[], V = Cell> {
         return choosen.label
     }
 
-    private serializeShort (bits: Bit[]): Bit[] {
-        // l binary 1s and one binary 0 (the unary representation of the length l)
-        const len = `${bits.map(_ => 1).join('')}0`
-        // Bits comprising the label itself
-        const s = bits.join('')
+    /**
+     * hml_short$0 consists of:
+     * - binary 0 as constructor
+     * - l binary 1s and one binary 0 (the unary representation of the length l)
+     * - bits comprising the label itself
+     */
+    protected static serializeLabelShort (bits: Bit[]): Bit[] {
+        const label = new Builder()
 
-        // hml_short$0
-        return `0${len}${s}`
-            .split('')
-            .map(b => Number(b) as Bit)
+        label.storeBit(0)
+            .storeBits(bits.map(() => 1))
+            .storeBit(0)
+            .storeBits(bits)
+
+        return label.bits
     }
 
-    private serializeLong (bits: Bit[], m: number): Bit[] {
-        // Big-endian binary representation of the length l in log2(n + 1) bits
-        const log2 = Math.ceil(Math.log2(m + 1))
-        const n = bits.length.toString(2).padStart(log2, '0')
-        // Bits comprising the label itself
-        const s = bits.join('')
+    /**
+     * hml_long$10 consists of:
+     * - binary 1 and 0 as constructor
+     * - big-endian binary representation of the length l in log2(n + 1) bits
+     * - bits comprising the label itself
+     */
+    protected static serializeLabelLong (bits: Bit[], m: number): Bit[] {
+        const label = new Builder()
 
-        // hml_long$10
-        return `10${n}${s}`
-            .split('')
-            .map(b => Number(b) as Bit)
+        label.storeBits([ 1, 0 ])
+            .storeUint(bits.length, Math.ceil(Math.log2(m + 1)))
+            .storeBits(bits)
+
+        return label.bits
     }
 
-    private serializeSame (bits: Bit[], m: number): Bit[] {
-        // Repeated bit
-        const v = bits[0]
-        const log2 = Math.ceil(Math.log2(m + 1))
-        // Big-endian binary representation of the length l in log2(n + 1) bits
-        const n = bits.length.toString(2).padStart(log2, '0')
+    /**
+     * hml_same$11 consists of:
+     * - binary 1 and 1 as constructor
+     * - unary representation of repeated bit
+     * - big-endian binary representation of the length l in log2(n + 1) bits
+     */
+    protected static serializeLabelSame (bits: Bit[], m: number): Bit[] {
+        const label = new Builder()
 
-        // hml_same$11
-        return `11${v}${n}`
-            .split('')
-            .map(b => Number(b) as Bit)
+        label.storeBits([ 1, 1 ])
+            .storeBit(bits[0])
+            .storeUint(bits.length, Math.ceil(Math.log2(m + 1)))
+
+        return label.bits
     }
 
     public set (key: K, value: V): this {
@@ -293,18 +294,34 @@ class Hashmap<K = Bit[], V = Cell> {
             : undefined
     }
 
-    public* entries (): IterableIterator<[ K, V ]> {
-        for (const [ k, v ] of this.hashmap) {
-            const key = this.deserializeKey(k.split('').map(b => Number(b) as Bit))
-            const value = this.deserializeValue(v)
-
-            yield [ key, value]
-        }
-    }
-
     public cell (): Cell {
         return this.serialize()
     }
 }
 
-export { Hashmap }
+class HashmapE<K = Bit[], V = Cell> extends Hashmap {
+    constructor (options?: HashmapOptions<K, V>) {
+        super(options)
+    }
+
+    protected serialize (): Cell {
+        const { sorted } = this.sortHashmap()
+        const result = new Builder()
+
+        if (!sorted.length) {
+            return result
+                .storeBit(0)
+                .cell()
+        }
+
+        return result
+            .storeBit(1)
+            .storeRef(HashmapE.serializeEdge(sorted))
+            .cell()
+    }
+}
+
+export {
+    HashmapE,
+    Hashmap
+}

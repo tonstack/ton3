@@ -1,11 +1,11 @@
-import { TextEncoder, TextDecoder } from 'util'
-import { Bit } from '../boc/builder'
+import {
+    TextEncoder,
+    TextDecoder
+} from 'util'
 
 const isNodeEnv = typeof process === 'object' && process.title === 'node'
 
-const uint8toInt8 = (uint8: number): number => {
-    return uint8 << 24 >> 24
-}
+const uint8toInt8 = (uint8: number): number => ((uint8 << 24) >> 24)
 
 const int8ToUint8 = (int8: number): number => {
     const int = 1 << 7
@@ -32,25 +32,6 @@ const hexToBits = (hex: string): Bit[] => hex.split('')
 
 const hexToBytes = (hex: string): Uint8Array => new Uint8Array(hex.match(/.{1,2}/g)
     .map(byte => parseInt(byte, 16)))
-
-const bitsToHex = (bits: Bit[]): string => {
-    const bitstring = bits.join('')
-    const hex = (bitstring.match(/.{1,4}/g) || []).map(el => parseInt(el.padStart(4, '0'), 2).toString(16))
-
-    return hex.join('')
-}
-
-const bitsToInt8 = (bits: Bit[]): number => {
-    return uint8toInt8(bytesToUint(bitsToBytes(bits)))
-}
-
-const bitsToBytes = (bits: Bit[]): Uint8Array => {
-    if (bits.length === 0) {
-        return new Uint8Array()
-    }
-
-    return hexToBytes(bitsToHex(bits))
-}
 
 const bytesToUint = (bytes: Uint8Array | number[]): number => {
     /* eslint-disable no-param-reassign */
@@ -82,10 +63,27 @@ const bytesToBits = (data: Uint8Array | number[]): Bit[] => {
             .padStart(8, '0')
             .split('')
             .map(bit => Number(bit) as Bit)
-    
+
         return acc.concat(chunk)
     }, [])
 }
+
+const bitsToHex = (bits: Bit[]): string => {
+    const bitstring = bits.join('')
+    const hex = (bitstring.match(/.{1,4}/g) || []).map(el => parseInt(el.padStart(4, '0'), 2).toString(16))
+
+    return hex.join('')
+}
+
+const bitsToBytes = (bits: Bit[]): Uint8Array => {
+    if (bits.length === 0) {
+        return new Uint8Array()
+    }
+
+    return hexToBytes(bitsToHex(bits))
+}
+
+const bitsToInt8 = (bits: Bit[]): number => uint8toInt8(bytesToUint(bitsToBytes(bits)))
 
 const bytesToHex = (bytes: Uint8Array): string => bytes.reduce((acc, uint) => `${acc}${uintToHex(uint)}`, '')
 

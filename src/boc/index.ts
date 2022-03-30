@@ -1,9 +1,7 @@
-import {
-    Bit,
-    Builder
-} from './builder'
+import { Builder } from './builder'
 import { Slice } from './slice'
 import { Cell } from './cell'
+import { Hashmap } from './hashmap'
 import {
     hexToBytes,
     bytesToHex
@@ -33,7 +31,7 @@ class BOC {
 
     /**
      * Returns deserialized BOC root cells.
-     * 
+     *
      * @static
      * @param {(Uint8Array | string)} data - Bytes or HEX of serialized BOC.
      * @return {Cell[]}
@@ -41,7 +39,7 @@ class BOC {
     public static from (data: Uint8Array | string): Cell[] {
         const isBytes = BOC.isBytes(data)
         const isHex = BOC.isHex(data)
-        const isFift = BOC.isFift(data)
+        // const isFift = BOC.isFift(data)
         let cells: Cell[]
 
         switch (true) {
@@ -53,8 +51,8 @@ class BOC {
                 cells = deserialize(hexToBytes(data as string))
 
                 break
-            // case isFift:
-            //     cells = deserializeFift(data as string)
+                // case isFift:
+                //     cells = deserializeFift(data as string)
 
             //     break
             default:
@@ -70,7 +68,7 @@ class BOC {
 
     /**
      * Returns deserialized standard BOC root cell.
-     * 
+     *
      * @static
      * @param {(Uint8Array | string)} data - Bytes or HEX of serialized BOC.
      * @return {Cell}
@@ -87,7 +85,7 @@ class BOC {
 
     /**
      * Returns serialized BOC in bytes representation.
-     * 
+     *
      * @static
      * @param {Cell[]} cells - Root cells.
      * @param {BOCOptions} [options]
@@ -103,7 +101,7 @@ class BOC {
 
     /**
      * Returns serialized standard BOC in bytes representation.
-     * 
+     *
      * @static
      * @param {Cell} cell - Root cell.
      * @param {BOCOptions} [options]
@@ -115,7 +113,7 @@ class BOC {
 
     /**
      * Returns serialized BOC in hex representation.
-     * 
+     *
      * @static
      * @param {Cell[]} cells - Root cells.
      * @param {BOCOptions} [options]
@@ -129,7 +127,7 @@ class BOC {
 
     /**
      * Returns serialized standard BOC in hex representation.
-     * 
+     *
      * @static
      * @param {Cell} cell - Root cell.
      * @param {BOCOptions} [options]
@@ -143,7 +141,7 @@ class BOC {
 export {
     BOC,
     Cell,
+    Hashmap,
     Slice,
-    Builder,
-    Bit
+    Builder
 }

@@ -1,4 +1,3 @@
-import { Bit } from '../boc/builder'
 import {
     bytesToBits,
     hexToBytes,

@@ -1,4 +1,4 @@
-import { BOC, Cell, Slice, Builder, Bit } from './boc'
+import { BOC, Cell, Slice, Builder, Hashmap } from './boc'
 import * as Address from './address'
 import * as Coins from './coins'
 import * as Utils from './utils'
@@ -9,7 +9,7 @@ export {
     Cell,
     Slice,
     Builder,
-    Bit,
+    Hashmap,
     Address,
     Coins,
     Utils,

@@ -1,5 +1,4 @@
 import type { Cell } from './cell'
-import type { Bit } from './builder'
 import { Coins } from '../coins'
 import { Address } from '../address'
 import {
@@ -16,14 +15,14 @@ class Slice {
 
     /**
      * Creates an instance of {@link Slice}
-     * 
+     *
      * @param {Bit[]} bits
      * @param {Cell[]} refs
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
      * const slice = new Slice(cell)
      * ```
@@ -43,22 +42,22 @@ class Slice {
 
     /**
      * Skip bits from {@link Slice}
-     * 
+     *
      * @param {number} size - Total bits should be skipped
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeBits([ 0, 1, 1, 0 ])
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.skip(2).readBits(2)) // [ 1, 0 ]
      * ```
-     * 
+     *
      * @return {this}
      */
     public skip (size: number): Slice {
@@ -73,23 +72,23 @@ class Slice {
 
     /**
      * Read ref from {@link Slice}
-     * 
+     *
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
      * const ref = new Cell()
-     * 
+     *
      * cell.refs.push(ref)
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readRef()) // Cell
      * ```
-     * 
+     *
      * @return {Cell}
      */
     public loadRef (splice: boolean = true): Cell {
@@ -102,22 +101,22 @@ class Slice {
 
     /**
      * Read bit from {@link Slice}
-     * 
+     *
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeBit(1)
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readBit()) // 1
      * ```
-     * 
+     *
      * @return {Bit[]}
      */
     public loadBit (splice: boolean = true): Bit {
@@ -130,23 +129,23 @@ class Slice {
 
     /**
      * Read bits from {@link Slice}
-     * 
+     *
      * @param {number} size - Total bits should be readed to represent requested value
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeBits([ 0, 1 ])
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readBits(2)) // [ 0, 1 ]
      * ```
-     * 
+     *
      * @return {Bit[]}
      */
     public loadBits (size: number, splice: boolean = true): Bit[] {
@@ -159,23 +158,23 @@ class Slice {
 
     /**
      * Read int from {@link Slice}
-     * 
+     *
      * @param {number} size - Total bits should be readed to represent requested value
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeUint(-14, 15)
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readUint(15)) // -14
      * ```
-     * 
+     *
      * @return {number}
      */
     public loadInt (size: number, splice: boolean = true): number {
@@ -187,23 +186,23 @@ class Slice {
 
     /**
      * Read uint from {@link Slice}
-     * 
+     *
      * @param {number} size - Total bits should be readed to represent requested value
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeUint(14, 9)
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readUint(9)) // 14
      * ```
-     * 
+     *
      * @return {number}
      */
     public loadUint (size: number, splice: boolean = true): number {
@@ -214,49 +213,49 @@ class Slice {
 
     /**
      * Read bytes from {@link Slice}
-     * 
+     *
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeBytes(new Uint8Array([ 255, 255 ]))
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readBytes(16)) // [ 255, 255 ]
      * ```
-     * 
+     *
      * @return {Uint8Array}
      */
     public loadBytes (size: number, splice: boolean = true): Uint8Array {
         const bits = this.loadBits(size, splice)
-        
+
         return bitsToBytes(bits)
     }
 
     /**
      * Read string from {@link Slice}
-     * 
+     *
      * @param {number} [size=null] - Total bits should be readed to represent requested value
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
-     * 
+     *
      * cell.bits.writeString('Привет, мир!')
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readString()) // 'Привет, мир!'
      * ```
-     * 
+     *
      * @return {string}
      */
     public loadString (size: number = null, splice: boolean = true): string {
@@ -271,21 +270,22 @@ class Slice {
      * Read {@link Address} from {@link Slice}
      *
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Address, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
      * const address = new Address('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny')
-     * 
+     *
      * cell.bits.writeAddress(address)
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
-     * console.log(slice.readAddress().toString()) // 'kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny'
+     *
+     * console.log(slice.readAddress().toString())
+     * // 'kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny'
      * ```
-     * 
+     *
      * @return {Address}
      */
     public loadAddress (splice: boolean = true): Address | null {
@@ -295,8 +295,8 @@ class Slice {
 
         if (flag.every((bit, i) => bit === FLAG_ADDRESS_NO[i])) {
             return splice
-                ? this.skip(2) && Address.NULL
-                : Address.NULL
+                ? this.skip(2) && Address.NONE
+                : Address.NONE
         }
 
         if (flag.every((bit, i) => bit === FLAG_ADDRESS[i])) {
@@ -305,7 +305,7 @@ class Slice {
             const bits = this.loadBits(size, false)
             // Splice 2 because we dont need flag bits
             // Anycast is currently unused
-            const _anycast = bits.splice(2, 1)
+            // const anycast = bits.splice(2, 1)
             const workchain = bitsToInt8(bits.splice(2, 8))
             const hash = bitsToHex(bits.splice(2, 256))
             const raw = `${workchain}:${hash}`
@@ -322,21 +322,21 @@ class Slice {
      * Read {@link Coins} from {@link Slice}
      *
      * @param {boolean} [splice=true] - Remove bits after reading
-     * 
+     *
      * @example
      * ```ts
      * import { Cell, Coins, Slice } from '@tonstack/tontools'
-     * 
+     *
      * const cell = new Cell()
      * const coins = new Coins('100')
-     * 
+     *
      * cell.bits.writeCoins(coins)
-     * 
+     *
      * const slice = cell.toSlice()
-     * 
+     *
      * console.log(slice.readCoins().toString()) // '100'
      * ```
-     * 
+     *
      * @return {Coins}
      */
     public loadCoins (splice: boolean = true): Coins {

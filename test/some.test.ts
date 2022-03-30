@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { Mnemonic } from '../src/wallet'
-import { BOC } from '../src/boc'
+import { BOC, Builder } from '../src/boc'
 import { HighloadWalletV2Contract, WalletV3Contract } from '../src/contracts'
 import { Address } from '../src/address'
 import { Coins } from '../src/coins'
@@ -21,35 +21,22 @@ describe('Some', () => {
         ])
         access.generate()
 
-        const myWallet = new WalletV3Contract(0, 11, access.thisKeyPair)
-        myWallet.addTransfers([
-            {
-                destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
-                amount: new Coins(0.1),
-                body: WalletV3Contract.simpleTextMsg('simpleTextMsg #1'),
-                mode: 3
-            },
-            {
-                destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
-                amount: new Coins(0.11),
-                body: WalletV3Contract.simpleTextMsg('simpleTextMsg #2'),
-                mode: 3
-            },
-            {
-                destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
-                amount: new Coins(0.12),
-                body: WalletV3Contract.simpleTextMsg('simpleTextMsg #3'),
-                mode: 3
-            },
-            {
-                destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
-                amount: new Coins(0.13),
-                body: WalletV3Contract.simpleTextMsg('simpleTextMsg #4'),
-                mode: 3
-            }
-        ])
+        const myWallet = new HighloadWalletV2Contract(0, 25, access.thisKeyPair)
+        for (let i: number = 0; i < 10; i++) {
+            myWallet.addTransfers([
+                {
+                    destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
+                    amount: new Coins(0.1),
+                    body: new Builder().storeUint(0, 32).storeString(`Highload Wallet V2 #${i}`).cell(),
+                    mode: 3
+                },
+            ])
+        }
 
-        console.log(`\n${BOC.toHexStandard(myWallet.sendTransfersExtMsg(1))}\n`)
+        myWallet.address.bounceable = true
+        console.log(myWallet.address.toString('base64', true))
+
+        console.log(`\n${BOC.toHexStandard(myWallet.sendTransfersExtMsg())}\n`)
     })
 
     // it('transfer', () => {

@@ -1,5 +1,5 @@
-import { Coins } from 'coins'
-import { Bit, Builder } from '../../boc/builder'
+import { Coins } from '../../coins'
+import { Builder } from '../../boc/builder'
 import { Cell, BOC } from '../../boc'
 import { MsgTemplate } from '../msg-template'
 import { Address } from '../../address'

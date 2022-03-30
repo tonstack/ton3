@@ -1,4 +1,4 @@
-import { Coins } from 'coins'
+import { Coins } from '../../coins'
 import { Builder } from '../../boc/builder'
 import { Cell, BOC } from '../../boc'
 import { MsgTemplate } from '../msg-template'

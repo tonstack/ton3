@@ -96,7 +96,7 @@ class BOC {
             throw new Error('BOC: root cells length must be from 1 to 4')
         }
 
-        return serialize(cells[0], options)
+        return serialize(cells, options)
     }
 
     /**

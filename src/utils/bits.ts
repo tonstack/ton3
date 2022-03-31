@@ -1,6 +1,6 @@
 /**
  * Augment bits with 1 and leading 0 to be divisible by 8 or 4 without remainder.
- * Mostly used for {@link BOC} serialization or {@link Cell} hash calculations.
+ * Mostly used for BOC serialization or Cell hash calculations.
  *
  * @param {Bit[]} bits - Bits which need to be augmented.
  * @param {(4 | 8)} [divider=8] - A divider after division by which there will be no remainder.
@@ -19,7 +19,7 @@ const augment = (bits: Bit[], divider: 4 | 8 = 8): Bit[] => {
 
 /**
  * Remove augmented bits.
- * Mostly used for {@link BoC} serialization or {@link Cell} hash calculations.
+ * Mostly used for BOC serialization or Cell hash calculations.
  *
  * @param {Bit[]} bits - Bits which needs to be cleared from augmented bits.
  * @return {this}
@@ -31,9 +31,7 @@ const rollback = (bits: Bit[]): Bit[] => {
         throw new Error('Incorrectly augmented bits.')
     }
 
-    bits.splice(-(index + 1))
-
-    return bits
+    return bits.slice(-(index + 1))
 }
 
 export {

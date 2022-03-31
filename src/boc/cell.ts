@@ -42,7 +42,7 @@ class Cell {
 
     private get refsDescriptor (): Bit[] {
         const maxLevel = this.calculateMaxLevel()
-        const value = this._refs.length + (this._exotic ? 1 : 0 * 8) + (maxLevel * 32)
+        const value = this._refs.length + (Number(this._exotic) * 8) + (maxLevel * 32)
         const bits = value.toString(2).padStart(8, '0').split('').map(el => parseInt(el, 10)) as Bit[]
 
         return bits

@@ -403,7 +403,9 @@ const serializeCell = (cell: Cell, hashmap: Map<string, number>): Bit[] => {
     return bits
 }
 
-const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
+const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
+    // TODO: fix more than 1 root cells support
+    const standard = root[0]
     const {
         has_idx = false,
         hash_crc32 = true,
@@ -413,8 +415,8 @@ const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
     } = options
 
     const { cells: cells_list, hashmap } = topological_order === 'breadth-first'
-        ? breadthFirstSort(root)
-        : depthFirstSort(root)
+        ? breadthFirstSort(standard)
+        : depthFirstSort(standard)
 
     const cells_num = cells_list.length
     const size = cells_num.toString(2).length
@@ -439,7 +441,6 @@ const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
 
     const result = new Builder(builder_size)
 
-    // TODO: fix more than 1 root cells support
     result.storeBytes(REACH_BOC_MAGIC_PREFIX)
         .storeBit(Number(has_idx))
         .storeBit(Number(hash_crc32))
@@ -448,7 +449,7 @@ const serialize = (root: Cell, options: BOCOptions = {}): Uint8Array => {
         .storeUint(size_bytes, 3)
         .storeUint(offset_bytes, 8)
         .storeUint(cells_num, size_bytes * 8)
-        .storeUint(root.refs.length, size_bytes * 8)
+        .storeUint(root.length, size_bytes * 8)
         .storeUint(0, size_bytes * 8)
         .storeUint(full_size, offset_bytes * 8)
         .storeUint(0, size_bytes * 8)

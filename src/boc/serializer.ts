@@ -3,8 +3,6 @@
 import { Cell } from './cell'
 import { Builder } from './builder'
 import {
-    uintToHex,
-    hexToBits,
     hexToBytes,
     bytesToUint,
     bytesCompare,
@@ -392,12 +390,14 @@ const breadthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, num
     }
 }
 
-const serializeCell = (cell: Cell, hashmap: Map<string, number>): Bit[] => {
+const serializeCell = (cell: Cell, hashmap: Map<string, number>, refIndexSize: number): Bit[] => {
     const bits = cell.refs.reduce((acc, ref) => {
+        const builder = new Builder()
         const refIndex = hashmap.get(ref.hash())
-        const data = hexToBits(uintToHex(refIndex))
 
-        return acc.concat(data)
+        builder.storeUint(refIndex, refIndexSize)
+
+        return acc.concat(builder.bits)
     }, [ ...cell.descriptors, ...cell.augmentedBits ] as Bit[])
 
     return bits
@@ -422,7 +422,7 @@ const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
     const size = cells_num.toString(2).length
     const size_bytes = Math.max(Math.ceil(size / 8), 1)
     const [ cells_bits, size_index ] = cells_list.reduce<[ Bit[], number[] ]>((acc, cell) => {
-        const bits = serializeCell(cell, hashmap)
+        const bits = serializeCell(cell, hashmap, size_bytes * 8)
 
         acc[0] = acc[0].concat(bits)
         acc[1].push(bits.length / 8)

@@ -13,7 +13,7 @@ class HighloadWalletV2Contract extends Wallet {
         keyPair: KeyPairStruct
     ) {
         super()
-        this.errors = { transfersOverflow: 'transfersOverflow: HighloadWalletV2 transfers must be <= 254' }
+        this.errors = { transfersOverflow: 'transfersOverflow: HighloadWalletV2 transfers must be <= 100' }
 
         this.workchain = workchain
         this._subWalletID = subWalletID
@@ -39,7 +39,9 @@ class HighloadWalletV2Contract extends Wallet {
     }
 
     public addTransfers (transfers: WalletTransfer[]): void {
-        if ((this._transfers.length + transfers.length) > 254) {
+        // Sending more than 100 messages from Highload Wallet V2
+        // may result in magical circumstances
+        if ((this._transfers.length + transfers.length) > 100) {
             throw new Error(this.errors.transfersOverflow)
         }
         transfers.forEach((t) => { this._transfers.push(t) })

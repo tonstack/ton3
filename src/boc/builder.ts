@@ -2,11 +2,11 @@ import { Cell } from './cell'
 import type { Slice } from './slice'
 import type { Address } from '../address'
 import type { Coins } from '../coins'
+import type { HashmapE } from './hashmap'
 import {
     bitsToBytes,
     stringToBytes
 } from '../utils/helpers'
-import { HashmapE } from './hashmap'
 
 class Builder {
     private _size: number
@@ -149,8 +149,7 @@ class Builder {
      */
     public storeBits (bits: Bit[]): this {
         this.checkBitsOverflow(bits.length)
-
-        bits.forEach(this.storeBit.bind(this))
+        this._bits = this._bits.concat(bits)
 
         return this
     }
@@ -247,8 +246,16 @@ class Builder {
         return this
     }
 
-    public storeDict (dict: HashmapE<any, any>): this {
-        const slice = dict.cell().parse()
+    /**
+     * Store a {@link HashmapE} in instance.
+     *
+     * @param {HashmapE} hashmap - HashmapE.
+     * @return {this}
+     */
+    public storeDict (hashmap: HashmapE<any, any>): this {
+        const slice = hashmap.cell()
+            .parse()
+
         this.storeSlice(slice)
 
         return this

@@ -56,19 +56,19 @@ class Cell {
     }
 
     private get representation (): Bit[] {
-        let representation = [ ...this.descriptors, ...this.augmentedBits ]
+        let representation = this.descriptors.concat(this.augmentedBits)
 
         this._refs.forEach((ref) => {
             const depth = ref.maxDepth
 
-            representation = [ ...representation, ...depth ]
+            representation = representation.concat(depth)
         })
 
         this._refs.forEach((ref) => {
             const hex = ref.hash()
             const bits = hexToBits(hex)
 
-            representation = [ ...representation, ...bits ]
+            representation = representation.concat(bits)
         })
 
         return representation
@@ -96,7 +96,7 @@ class Cell {
     }
 
     public get descriptors (): Bit[] {
-        return [ ...this.refsDescriptor, ...this.bitsDescriptor ]
+        return this.refsDescriptor.concat(this.bitsDescriptor)
     }
 
     public get augmentedBits (): Bit[] {

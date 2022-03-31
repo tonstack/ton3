@@ -20,7 +20,7 @@ const LEAN_BOC_MAGIC_PREFIX = hexToBytes('68FF65F3')
 const LEAN_BOC_MAGIC_PREFIX_CRC = hexToBytes('ACC3A728')
 
 interface BOCOptions {
-    has_idx?: boolean
+    has_index?: boolean
     hash_crc32?: boolean
     has_cache_bits?: boolean
     topological_order?: 'breadth-first' | 'depth-first'
@@ -28,12 +28,12 @@ interface BOCOptions {
 }
 
 interface BocHeader {
-    has_idx: boolean
+    has_index: boolean
     hash_crc32: number
     has_cache_bits: boolean
     flags: number
     size_bytes: number
-    off_bytes: number
+    offset_bytes: number
     cells_num: number
     roots_num: number
     absent_num: number
@@ -116,12 +116,12 @@ const deserializeHeader = (bytes: number[]): BocHeader => {
     const prefix = bytes.splice(0, 4)
     const [ flags_byte ] = bytes.splice(0, 1)
     const header: BocHeader = {
-        has_idx: true,
+        has_index: true,
         hash_crc32: null,
         has_cache_bits: false,
         flags: 0,
         size_bytes: flags_byte,
-        off_bytes: null,
+        offset_bytes: null,
         cells_num: null,
         roots_num: null,
         absent_num: null,
@@ -131,11 +131,11 @@ const deserializeHeader = (bytes: number[]): BocHeader => {
     }
 
     if (bytesCompare(prefix, REACH_BOC_MAGIC_PREFIX)) {
-        header.has_idx = (flags_byte & 128) !== 0
-        header.hash_crc32 = flags_byte & 64
+        header.has_index = (flags_byte & 128) !== 0
         header.has_cache_bits = (flags_byte & 32) !== 0
         header.flags = (flags_byte & 16) * 2 + (flags_byte & 8)
         header.size_bytes = flags_byte % 8
+        header.hash_crc32 = flags_byte & 64
     } else if (bytesCompare(prefix, LEAN_BOC_MAGIC_PREFIX)) {
         header.hash_crc32 = 0
     } else if (bytesCompare(prefix, LEAN_BOC_MAGIC_PREFIX_CRC)) {
@@ -148,13 +148,13 @@ const deserializeHeader = (bytes: number[]): BocHeader => {
         throw new Error('Not enough bytes for encoding cells counters')
     }
 
-    const [ off_bytes ] = bytes.splice(0, 1)
+    const [ offset_bytes ] = bytes.splice(0, 1)
 
     header.cells_num = bytesToUint(bytes.splice(0, header.size_bytes))
     header.roots_num = bytesToUint(bytes.splice(0, header.size_bytes))
     header.absent_num = bytesToUint(bytes.splice(0, header.size_bytes))
-    header.tot_cells_size = bytesToUint(bytes.splice(0, off_bytes))
-    header.off_bytes = off_bytes
+    header.tot_cells_size = bytesToUint(bytes.splice(0, offset_bytes))
+    header.offset_bytes = offset_bytes
 
     if (bytes.length < header.roots_num * header.size_bytes) {
         throw new Error('Not enough bytes for encoding root cells hashes')
@@ -166,14 +166,14 @@ const deserializeHeader = (bytes: number[]): BocHeader => {
         return acc.concat([ refIndex ])
     }, [])
 
-    if (header.has_idx) {
-        if (bytes.length < header.off_bytes * header.cells_num) {
+    if (header.has_index) {
+        if (bytes.length < header.offset_bytes * header.cells_num) {
             throw new Error('Not enough bytes for index encoding')
         }
 
         // TODO: figure out why index = [] was unused
         Object.keys([ ...Array(header.cells_num) ])
-            .forEach(() => bytes.splice(0, header.off_bytes))
+            .forEach(() => bytes.splice(0, header.offset_bytes))
     }
 
     if (bytes.length < header.tot_cells_size) {
@@ -228,11 +228,13 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
         .storeBits(bits)
         .cell()
 
-    const refIndexes = [ ...Array(refNum) ].reduce<number[]>((acc) => {
+    const refIndexes: number[] = []
+
+    for (let i = 0; i < refNum; i += 1) {
         const refIndex = bytesToUint(remainder.splice(0, refIndexSize))
 
-        return acc.concat([ refIndex ])
-    }, [])
+        refIndexes.push(refIndex)
+    }
 
     return {
         pointer: { cell, refIndexes },
@@ -242,25 +244,21 @@ const deserializeCell = (bytes: number[], refIndexSize: number): CellData => {
 
 const deserialize = (data: Uint8Array): Cell[] => {
     const bytes = Array.from(data)
+    const pointers: CellPointer[] = []
     const {
         cells_num,
         size_bytes,
         cells_data,
         root_list
     } = deserializeHeader(bytes)
-    const { pointers } = [ ...Array(cells_num) ].reduce<{
-        pointers: CellPointer[],
-        data: number[]
-    }>((acc) => {
-        const deserialized = deserializeCell(acc.data, size_bytes)
 
-        acc.data = deserialized.remainder
-        acc.pointers.push(deserialized.pointer)
+    for (let i = 0, remainder = cells_data; i < cells_num; i += 1) {
+        const deserialized = deserializeCell(remainder, size_bytes)
 
-        return acc
-    }, { pointers: [], data: cells_data })
+        remainder = deserialized.remainder
+        pointers.push(deserialized.pointer)
+    }
 
-    // TODO: fix to builder
     Object.keys(pointers)
         .reverse()
         .forEach((i) => {
@@ -391,6 +389,7 @@ const breadthFirstSort = (root: Cell): { cells: Cell[], hashmap: Map<string, num
 }
 
 const serializeCell = (cell: Cell, hashmap: Map<string, number>, refIndexSize: number): Bit[] => {
+    const representation = cell.descriptors.concat(cell.augmentedBits)
     const bits = cell.refs.reduce((acc, ref) => {
         const builder = new Builder()
         const refIndex = hashmap.get(ref.hash())
@@ -398,7 +397,7 @@ const serializeCell = (cell: Cell, hashmap: Map<string, number>, refIndexSize: n
         builder.storeUint(refIndex, refIndexSize)
 
         return acc.concat(builder.bits)
-    }, [ ...cell.descriptors, ...cell.augmentedBits ] as Bit[])
+    }, representation)
 
     return bits
 }
@@ -407,9 +406,9 @@ const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
     // TODO: fix more than 1 root cells support
     const standard = root[0]
     const {
-        has_idx = false,
-        hash_crc32 = true,
+        has_index = false,
         has_cache_bits = false,
+        hash_crc32 = true,
         topological_order = 'breadth-first',
         flags = 0
     } = options
@@ -437,12 +436,12 @@ const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
         + (cells_bits.length)
         + ((size_bytes * 8) * 4)
         + (offset_bytes * 8)
-        + (has_idx ? (cells_list.length * (offset_bytes * 8)) : 0)
+        + (has_index ? (cells_list.length * (offset_bytes * 8)) : 0)
 
     const result = new Builder(builder_size)
 
     result.storeBytes(REACH_BOC_MAGIC_PREFIX)
-        .storeBit(Number(has_idx))
+        .storeBit(Number(has_index))
         .storeBit(Number(hash_crc32))
         .storeBit(Number(has_cache_bits))
         .storeUint(flags, 2)
@@ -454,7 +453,7 @@ const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
         .storeUint(full_size, offset_bytes * 8)
         .storeUint(0, size_bytes * 8)
 
-    if (has_idx) {
+    if (has_index) {
         cells_list.forEach((_, index) => {
             result.storeUint(size_index[index], offset_bytes * 8)
         })

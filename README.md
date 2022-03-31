@@ -1,7 +1,6 @@
 ## 💎 tontools
 
-[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg?style=for-the-badge)](http://www.typescriptlang.org/)
-[![TON](https://img.shields.io/badge/based%20on-The%20Open%20Network-blue?style=for-the-badge)](https://ton.org/)
+![npm](https://img.shields.io/npm/v/@tonstack/tontools) ![GitHub top language](https://img.shields.io/github/languages/top/tonstack/tontools-js) [![TON](https://img.shields.io/badge/based%20on-The%20Open%20Network-blue)](https://ton.org/)
 
 Tontools-js is a javascript package inspired by [tonweb](https://github.com/toncenter/tonweb) to work with [TON blockchain](https://ton.org).\
 Visit [documentation](./docs/) to see API reference.
@@ -12,27 +11,39 @@ Visit [documentation](./docs/) to see API reference.
 npm i @tonstack/tontools
 ```
 
-## How to use
+## Simple usage
 ```typescript
-import { BOC, Builder } from '@tonstack/tontools'
+import { Mnemonic, BOC, WalletV3Contract } from '@tonstack/tontools'
 
-const text = 'Hello, World!'
-const cell = new Builder()
-    .storeString(text)
-    .cell()
+const access = new Mnemonic()
+access.generate() // generate mnemonic/keypair
 
-const boc = BOC.toBytesStandard(cell)
-const result = BOC.fromStandard(boc)
-    .parse()
-    .loadString()
+console.log(access.thisMnemonic) // print mnemonic
 
-console.log(text === result) // true
+const wall = new WalletV3Contract(0, 0, access.thisKeyPair)
+
+wall.address.bounceable = true
+console.log(wall.address.toString('base64', true))
+
+// print walletV3 deploy BOC in hexadecimal
+console.log(`\n${BOC.toHexStandard(myWallet.deployExtMsg())}\n`)
 ```
 
-## Main authors
+## Features and status
 
-[tjifyodor](https://github.com/tjifyodor)\
-[cryshado](https://github.com/cryshado)
+| Feature                                     | Status  |
+|---------------------------------------------|-------- |
+| Builder, Cell, Slice                        | ✅      |
+| Hashmap, HashmapE (de)serialization         | ✅      |
+| Ordinary Bag of Cells (de)serialization     | ✅      |
+| Mnemonic/keypair with bip39 + ed25519       | ✅      |
+| Coins (class for ton, nanoton e.t.c.)       | ✅      |
+| TON address manipulation                    | ✅      |
+| Msg Templates (such as MessageX e.t.c.)     | ✅      |
+| walletv3 and highload-wallet-v2 support     | ✅      |
+| TL (de)serialization                        | ❌      |
+| Connecting rust ADNL bindings               | ❌      |
+| ~100% tests coverage                        | ❌      |
 
 ## License
 

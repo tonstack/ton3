@@ -53,7 +53,7 @@ class HighloadWalletV2Contract extends Wallet {
                 .storeRef(MsgTemplate.MessageX({
                     info: MsgTemplate.IntMsgInfo$0({
                         bounce: v.destination.bounceable,
-                        src: Address.NULL,
+                        src: Address.NONE,
                         dest: v.destination,
                         value: v.amount
                     }),

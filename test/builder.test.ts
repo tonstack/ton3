@@ -290,7 +290,7 @@ describe('Builder', () => {
         })
 
         it('should store null Address', () => {
-            const result = builder.storeAddress(Address.NULL)
+            const result = builder.storeAddress(Address.NONE)
 
             expect(result.bits).to.eql([ 0, 0 ])
             expect(result.bits.length).to.eq(2)
@@ -343,45 +343,6 @@ describe('Builder', () => {
             expect(result.bits.length).to.not.eq(builder.bits.length)
             expect(result.refs).to.not.eql(builder.refs)
             expect(result.refs.length).to.not.eq(builder.refs.length)
-        })
-    })
-
-    describe('#augmentBits()', () => {
-        it('should augment bits', () => {
-            const bits = [ 1, 0, 1, 0, 1, 0, 1, 0, 1 ] as Bit[]
-            const result1 = Builder.augmentBits(bits)
-            const result2 = Builder.augmentBits(bits, 8)
-            const result3 = Builder.augmentBits(bits, 4)
-
-            expect(result1).to.eql([ ...bits, ...[ 1, 0, 0, 0, 0, 0, 0 ] ])
-            expect(result2).to.eql([ ...bits, ...[ 1, 0, 0, 0, 0, 0, 0 ] ])
-            expect(result3).to.eql([ ...bits, ...[ 1, 0, 0 ] ])
-        })
-
-        it('should not augment bits', () => {
-            const bits1 = [ 1, 0, 1, 0, 1, 0, 1, 0 ] as Bit[]
-            const bits2 = [ 1, 0, 1, 0 ] as Bit[]
-            const result1 = Builder.augmentBits(bits1, 8)
-            const result2 = Builder.augmentBits(bits2, 4)
-
-            expect(result1).to.eql(bits1)
-            expect(result2).to.eql(bits2)
-        })
-    })
-
-    describe('#rollbackBits()', () => {
-        it('should rollback bits', () => {
-            const bits = [ 0, 1, 1, 0, 0, 0, 0, 0 ] as Bit[]
-            const result = Builder.rollbackBits(bits)
-
-            expect(result).to.eql([ 0, 1 ])
-        })
-
-        it('should throw error on incorrectly augmented bits', () => {
-            const bits = [ 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] as Bit[]
-            const result = () => Builder.rollbackBits(bits)
-
-            expect(result).to.throw('Builder: incorrectly augmented bits.')
         })
     })
 

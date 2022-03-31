@@ -74,8 +74,8 @@ class MsgTemplate {
     public static ExtInMsgInfo$10 (options: ExtInMsgInfo$10Options): Cell {
         const builder = new Builder()
         const {
-            src = Address.NULL,
-            dest = Address.NULL,
+            src = Address.NONE,
+            dest = Address.NONE,
             importFee = new Coins(0)
         } = options
 

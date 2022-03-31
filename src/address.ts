@@ -31,7 +31,6 @@ interface AddressData extends AddressTag {
  * @class Address
  */
 class Address {
-
     private _hash: Uint8Array
 
     private _workchain: number
@@ -42,21 +41,21 @@ class Address {
 
     /**
      * Creates an instance of {@link Address}
-     * 
+     *
      * Next formats can be used as constructor argument:
      * - Raw
      * - Base64
      * - Address
-     * 
+     *
      * @param {(string | Address | Uint8Array)} address
-     * 
+     *
      * @example
      * ```ts
      * import { Address } from '@tonstack/tontools'
-     * 
+     *
      * const bytes = new Uint8Array() // containing workchain and address hash bytes
      * const address = new Address('kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny')
-     * 
+     *
      * new Address('-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260')
      * new Address('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny')
      * new Address(address)
@@ -174,10 +173,10 @@ class Address {
     }
 
     private static parseAddress (value: Address): AddressData {
-        const workchain = value.workchain
+        const { workchain } = value
         const hash = new Uint8Array(value.hash)
-        const bounceable = value.bounceable
-        const testOnly = value.testOnly
+        const { bounceable } = value
+        const { testOnly } = value
 
         return {
             bounceable,
@@ -230,24 +229,24 @@ class Address {
 
     /**
      * Get raw or base64 representation of {@link Address}
-     * 
+     *
      * @param {AddressType} [type="base64"] - Can be "base64" or "raw"
      * @param {boolean} [urlSafe=true] - Url-safe representation (only works for base64)
-     * 
+     *
      * @example
      * ```ts
      * import { Address } from '@tonstack/tontools'
-     * 
+     *
      * const raw = '-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260'
      * const address = new Address(raw)
      *     .setBounceableFlag(true)
      *     .setTestOnlyFlag(true)
-     * 
+     *
      * console.log(address.toString('base64')) // kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
      * console.log(address.toString('base64', false)) // kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
      * console.log(address.toString('raw')) // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
      * ```
-     * 
+     *
      * @returns {string}
      */
     public toString (type: AddressType = 'base64', urlSafe: boolean = true): string {
@@ -273,7 +272,7 @@ class Address {
      *
      * @static
      */
-    public static readonly NULL = null
+    public static readonly NONE = null
 
     private static isAddress (address: any): boolean {
         return address instanceof Address

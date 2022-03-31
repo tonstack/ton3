@@ -305,7 +305,8 @@ class Slice {
             const bits = this.loadBits(size, false)
             // Splice 2 because we dont need flag bits
             // Anycast is currently unused
-            // const anycast = bits.splice(2, 1)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const anycast = bits.splice(2, 1)
             const workchain = bitsToInt8(bits.splice(2, 8))
             const hash = bitsToHex(bits.splice(2, 256))
             const raw = `${workchain}:${hash}`

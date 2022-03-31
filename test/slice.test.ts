@@ -386,26 +386,26 @@ describe('Slice', () => {
         })
 
         it('should load null Address with splicing bits', () => {
-            builder.storeAddress(Address.NULL)
+            builder.storeAddress(Address.NONE)
 
             const slice = builder.cell().parse()
             const result1 = slice.loadAddress()
             // @ts-ignore
             const result2 = slice.bits.length
 
-            expect(result1).to.eq(Address.NULL)
+            expect(result1).to.eq(Address.NONE)
             expect(result2).to.eq(0)
         })
 
         it('should load null Address without splicing bits', () => {
-            builder.storeAddress(Address.NULL)
+            builder.storeAddress(Address.NONE)
 
             const slice = builder.cell().parse()
             const result1 = slice.loadAddress(false)
             // @ts-ignore
             const result2 = slice.bits.length
 
-            expect(result1).to.eq(Address.NULL)
+            expect(result1).to.eq(Address.NONE)
             expect(result2).to.eq(2)
         })
 

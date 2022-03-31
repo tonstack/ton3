@@ -76,7 +76,7 @@ class WalletV3Contract extends Wallet {
             msg.storeRef(MsgTemplate.MessageX({
                 info: MsgTemplate.IntMsgInfo$0({
                     bounce: t.destination.bounceable,
-                    src: Address.NULL,
+                    src: Address.NONE,
                     dest: t.destination,
                     value: t.amount
                 }),

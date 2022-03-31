@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { Mnemonic } from '../src/wallet'
 import { BOC, Builder } from '../src/boc'
-import { HighloadWalletV2Contract, WalletV3Contract } from '../src/contracts'
+import { HighloadWalletV2Contract } from '../src/contracts'
 import { Address } from '../src/address'
 import { Coins } from '../src/coins'
 
@@ -22,19 +22,18 @@ describe('Some', () => {
         access.generate()
 
         const myWallet = new HighloadWalletV2Contract(0, 30, access.thisKeyPair)
-        for (let i: number = 0; i < 1; i++) {
+        for (let i: number = 0; i < 1; i += 1) {
             myWallet.addTransfers([
                 {
                     destination: new Address('EQBosFYEWK-JOuNOdsN-iUoTaKwS4G0hoNTUrhfndZYvXGf3'),
                     amount: new Coins(4.6),
                     body: new Builder().storeUint(0, 32).storeString(`${i}`).cell(),
                     mode: 3
-                },
+                }
             ])
         }
 
-        myWallet.address.bounceable = true
-        console.log(myWallet.address.toString('base64', true))
+        console.log(myWallet.address.toString('base64', { bounceable: true }))
 
         console.log(`\n${BOC.toHexStandard(myWallet.sendTransfersExtMsg(1000))}\n`)
 

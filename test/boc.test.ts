@@ -17,7 +17,7 @@ describe('BOC', () => {
             const hex1 = BOC.toHex(cells1)
             const hex2 = BOC.toHex(cells2, {
                 has_cache_bits: false,
-                has_idx: true,
+                has_index: true,
                 hash_crc32: true,
                 topological_order: 'depth-first',
                 flags: 2
@@ -41,7 +41,7 @@ describe('BOC', () => {
             const hex1 = BOC.toHexStandard(cell1)
             const hex2 = BOC.toHexStandard(cell2, {
                 has_cache_bits: false,
-                has_idx: true,
+                has_index: true,
                 hash_crc32: true,
                 topological_order: 'depth-first',
                 flags: 2
@@ -61,7 +61,7 @@ describe('BOC', () => {
             const hex1 = BOC.toBytes(cells1)
             const hex2 = BOC.toBytes(cells2, {
                 has_cache_bits: false,
-                has_idx: true,
+                has_index: true,
                 hash_crc32: true,
                 topological_order: 'depth-first',
                 flags: 2
@@ -85,7 +85,7 @@ describe('BOC', () => {
             const hex1 = BOC.toBytesStandard(cell1)
             const hex2 = BOC.toBytesStandard(cell2, {
                 has_cache_bits: false,
-                has_idx: true,
+                has_index: true,
                 hash_crc32: true,
                 topological_order: 'depth-first',
                 flags: 2

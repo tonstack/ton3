@@ -20,24 +20,24 @@ describe('Address', () => {
 
         it('should create Address from non url-safe base64', () => {
             const base64unsafe = 'kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny'
-            const address = new Address(base64unsafe)
-            const result = address.toString('base64', false)
+            const address1 = new Address(base64unsafe)
+            const result = address1.toString('base64', { urlSafe: false })
 
             expect(result).to.equal(base64unsafe)
         })
 
         it('should create Address from url-safe base64', () => {
             const base64 = 'kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny'
-            const address = new Address(base64)
-            const result = address.toString('base64', true)
+            const address1 = new Address(base64)
+            const result = address1.toString('base64', { urlSafe: true })
 
             expect(result).to.equal(base64)
         })
 
         it('should create Address from raw address', () => {
             const raw = '-1:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
-            const address = new Address(raw)
-            const result = address.toString('raw')
+            const address1 = new Address(raw)
+            const result = address1.toString('raw')
 
             expect(result).to.equal(raw)
         })
@@ -69,96 +69,70 @@ describe('Address', () => {
     })
 
     describe('#workchain', () => {
-        it('should set and get workchain', () => {
-            address.workchain = 0
+        it('should get address workchain', () => {
+            const result = address.workchain
 
-            expect(address.workchain).to.equal(0)
-
-            address.workchain = -1
-
-            expect(address.workchain).to.equal(-1)
+            expect(result).to.equal(-1)
         })
 
-        it('should throw error from bad input data', () => {
-            const result = () => { address.workchain = -99999999 }
-
-            expect(result).to.throw('Address: workchain must be int8.')
-
+        it('should throw error from changing attempt', () => {
             // @ts-ignore
-            const result2 = () => { address.workchain = 'bad_input' }
+            const result = () => { address.workchain = 0 }
 
-            expect(result2).to.throw('Address: workchain must be int8.')
+            expect(result).to.throw('Cannot set property workchain of [object Object] which has only a getter')
         })
     })
 
     describe('#bounceable', () => {
-        it('should set and get bounceable flag', () => {
-            address.bounceable = false
+        it('should get address bounceable flag', () => {
+            const result = address.bounceable
 
-            expect(address.bounceable).to.equal(false)
-
-            address.bounceable = true
-
-            expect(address.bounceable).to.equal(true)
+            expect(result).to.equal(true)
         })
 
-        it('should throw error from bad input data', () => {
+        it('should throw error from changing attempt', () => {
             // @ts-ignore
-            const result = () => { address.bounceable = 1 }
+            const result = () => { address.bounceable = false }
 
-            expect(result).to.throw('Address: bounceable flag must be a boolean.')
-
-            // @ts-ignore
-            const result2 = () => { address.bounceable = 'bad_input' }
-
-            expect(result2).to.throw('Address: bounceable flag must be a boolean.')
+            expect(result).to.throw('Cannot set property bounceable of [object Object] which has only a getter')
         })
     })
 
     describe('#testOnly', () => {
-        it('should set and get testOnly flag', () => {
-            address.testOnly = false
+        it('should get address testOnly flag', () => {
+            const result = address.testOnly
 
-            expect(address.testOnly).to.equal(false)
-
-            address.testOnly = true
-
-            expect(address.testOnly).to.equal(true)
+            expect(result).to.equal(true)
         })
 
-        it('should throw error from bad input data', () => {
+        it('should throw error from changing attempt', () => {
             // @ts-ignore
-            const result = () => { address.testOnly = 1 }
+            const result = () => { address.testOnly = false }
 
-            expect(result).to.throw('Address: testOnly flag must be a boolean.')
-
-            // @ts-ignore
-            const result2 = () => { address.testOnly = 'bad_input' }
-
-            expect(result2).to.throw('Address: testOnly flag must be a boolean.')
+            expect(result).to.throw('Cannot set property testOnly of [object Object] which has only a getter')
         })
     })
 
     describe('#toString()', () => {
-        it('should return non url-safe base64 address with non bounceable and non testOnly tag', () => {
-            address.bounceable = false
-            address.testOnly = false
+        it('should return non url-safe base64 address in workchain 0 with non bounceable and non testOnly flags', () => {
+            const result = address.toString('base64', {
+                workchain: 0,
+                bounceable: false,
+                testOnly: false,
+                urlSafe: false
+            })
 
-            const result = address.toString('base64', false)
-
-            expect(result).to.equal('Uf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYG+9')
+            expect(result).to.equal('UQD8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYJD1')
         })
 
         it('should return url-safe base64 address by default', () => {
             const result = address.toString()
-            address.bounceable = true
-            address.testOnly = true
 
             expect(result).to.equal('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny')
         })
 
         it('should return url-safe base64 address', () => {
-            const result = address.toString('base64', true)
+            const result = address.toString('base64', { urlSafe: true })
 
             expect(result).to.equal('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny')
         })

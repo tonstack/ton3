@@ -25,19 +25,26 @@ interface AddressData extends AddressTag {
     hash: Uint8Array
 }
 
+interface AddressOptions {
+    urlSafe?: boolean
+    workchain?: number
+    bounceable?: boolean
+    testOnly?: boolean
+}
+
 /**
  * Smart contract address
  *
  * @class Address
  */
 class Address {
-    private _hash: Uint8Array
+    private readonly _hash: Uint8Array
 
-    private _workchain: number
+    private readonly _workchain: number
 
-    private _bounceable: boolean
+    private readonly _bounceable: boolean
 
-    private _testOnly: boolean
+    private readonly _testOnly: boolean
 
     /**
      * Creates an instance of {@link Address}
@@ -90,8 +97,8 @@ class Address {
             throw new Error('Address: can\'t parse address. Unknown type.')
         }
 
-        this._workchain = result.workchain
         this._hash = result.hash
+        this._workchain = result.workchain
         this._bounceable = result.bounceable
         this._testOnly = result.testOnly
     }
@@ -112,31 +119,8 @@ class Address {
         return this._testOnly
     }
 
-    public set workchain (value: number) {
-        if (typeof value !== 'number' || value < -128 || value >= 128) {
-            throw new Error('Address: workchain must be int8.')
-        }
-
-        this._workchain = value
-    }
-
-    public set bounceable (value: boolean) {
-        if (typeof value !== 'boolean') {
-            throw new Error('Address: bounceable flag must be a boolean.')
-        }
-
-        this._bounceable = value
-    }
-
-    public set testOnly (value: boolean) {
-        if (typeof value !== 'boolean') {
-            throw new Error('Address: testOnly flag must be a boolean.')
-        }
-
-        this._testOnly = value
-    }
-
     private static isEncoded (address: any): boolean {
+        // eslint-disable-next-line no-useless-escape
         const re = /^([a-zA-Z0-9_-]{48}|[a-zA-Z0-9\/\+]{48})$/
 
         return typeof address === 'string' && re.test(address)
@@ -173,10 +157,8 @@ class Address {
     }
 
     private static parseAddress (value: Address): AddressData {
-        const { workchain } = value
+        const { workchain, bounceable, testOnly } = value
         const hash = new Uint8Array(value.hash)
-        const { bounceable } = value
-        const { testOnly } = value
 
         return {
             bounceable,
@@ -209,17 +191,18 @@ class Address {
     }
 
     private static decodeTag (tag: number): AddressTag {
-        const testOnly = (tag & FLAG_TEST_ONLY) !== 0
+        let data = tag
+        const testOnly = (data & FLAG_TEST_ONLY) !== 0
 
         if (testOnly) {
-            tag = tag ^ FLAG_TEST_ONLY
+            data ^= FLAG_TEST_ONLY
         }
 
-        if (![ FLAG_BOUNCEABLE, FLAG_NON_BOUNCEABLE ].includes(tag)) {
+        if (![ FLAG_BOUNCEABLE, FLAG_NON_BOUNCEABLE ].includes(data)) {
             throw new Error('Address: bad address tag.')
         }
 
-        const bounceable = tag === FLAG_BOUNCEABLE
+        const bounceable = data === FLAG_BOUNCEABLE
 
         return {
             bounceable,
@@ -242,15 +225,41 @@ class Address {
      *     .setBounceableFlag(true)
      *     .setTestOnlyFlag(true)
      *
-     * console.log(address.toString('base64')) // kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
-     * console.log(address.toString('base64', false)) // kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
-     * console.log(address.toString('raw')) // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
+     * console.log(address.toString('base64'))
+     * // kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
+     *
+     * console.log(address.toString('base64', false))
+     * // kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
+     *
+     * console.log(address.toString('raw'))
+     * // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
      * ```
      *
      * @returns {string}
      */
-    public toString (type: AddressType = 'base64', urlSafe: boolean = true): string {
-        const { workchain, bounceable, testOnly } = this
+    public toString (type: AddressType = 'base64', options?: AddressOptions): string {
+        const {
+            workchain = this.workchain,
+            bounceable = this.bounceable,
+            testOnly = this.testOnly,
+            urlSafe = true
+        } = options || {}
+
+        if (typeof workchain !== 'number' || workchain < -128 || workchain >= 128) {
+            throw new Error('Address: workchain must be int8.')
+        }
+
+        if (typeof bounceable !== 'boolean') {
+            throw new Error('Address: bounceable flag must be a boolean.')
+        }
+
+        if (typeof testOnly !== 'boolean') {
+            throw new Error('Address: testOnly flag must be a boolean.')
+        }
+
+        if (typeof urlSafe !== 'boolean') {
+            throw new Error('Address: urlSafe flag must be a boolean.')
+        }
 
         if (type === 'raw') {
             return `${workchain}:${bytesToHex(this._hash)}`.toUpperCase()
@@ -278,8 +287,10 @@ class Address {
         return address instanceof Address
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     public static isValid (address: any): boolean {
         try {
+            // eslint-disable-next-line no-new
             new Address(address)
 
             return true

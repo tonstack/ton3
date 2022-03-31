@@ -1,6 +1,6 @@
 ## 💎 tontools
 
-![npm](https://img.shields.io/npm/v/@tonstack/tontools) ![GitHub top language](https://img.shields.io/github/languages/top/tonstack/tontools-js) [![TON](https://img.shields.io/badge/based%20on-The%20Open%20Network-blue)](https://ton.org/)
+[![npm](https://img.shields.io/npm/v/@tonstack/tontools)](https://www.npmjs.com/package/@tonstack/tontools) ![GitHub top language](https://img.shields.io/github/languages/top/tonstack/tontools-js) [![TON](https://img.shields.io/badge/based%20on-The%20Open%20Network-blue)](https://ton.org/)
 
 Tontools-js is a javascript package inspired by [tonweb](https://github.com/toncenter/tonweb) to work with [TON blockchain](https://ton.org).\
 Visit [documentation](./docs/) to see API reference.

@@ -17,6 +17,12 @@ lerna-debug.log*
 /coverage
 /.nyc_output
 t.py
+hex.txt
+out.boc
+
+# TON configs
+global-config.json
+testnet-global.config.json
 
 # IDEs and editors
 /.idea

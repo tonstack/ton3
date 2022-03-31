@@ -6,6 +6,7 @@ import {
     bitsToBytes,
     stringToBytes
 } from '../utils/helpers'
+import { HashmapE } from './hashmap'
 
 class Builder {
     private _size: number
@@ -242,6 +243,13 @@ class Builder {
         this.storeUint(anycast, 1)
         this.storeInt(address.workchain, 8)
         this.storeBytes(address.hash)
+
+        return this
+    }
+
+    public storeDict (dict: HashmapE<any, any>): this {
+        const slice = dict.cell().parse()
+        this.storeSlice(slice)
 
         return this
     }

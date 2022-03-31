@@ -299,7 +299,7 @@ class Hashmap<K = Bit[], V = Cell> {
     }
 }
 
-class HashmapE<K = Bit[], V = Cell> extends Hashmap {
+class HashmapE<K = Bit[], V = Cell> extends Hashmap<K, V> {
     constructor (options?: HashmapOptions<K, V>) {
         super(options)
     }

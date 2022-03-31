@@ -21,22 +21,22 @@ describe('Some', () => {
         ])
         access.generate()
 
-        const myWallet = new HighloadWalletV2Contract(0, 25, access.thisKeyPair)
-        for (let i: number = 0; i < 254; i++) {
-            myWallet.addTransfers([
-                {
-                    destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
-                    amount: new Coins(0.1),
-                    body: new Builder().storeUint(0, 32).storeString(`Highload Wallet V2 #${i}`).cell(),
-                    mode: 3
-                },
-            ])
-        }
+        const myWallet = new HighloadWalletV2Contract(0, 30, access.thisKeyPair)
+        // for (let i: number = 0; i < 10; i++) {
+        //     myWallet.addTransfers([
+        //         {
+        //             destination: new Address('EQBAtTjqPOsBvWPO_ij7xkLA11cjiXUKA3gRHVSbrYMEmWOF'),
+        //             amount: new Coins(0.1),
+        //             body: new Builder().storeUint(0, 32).storeString(`Highload Wallet V2 #${i}`).cell(),
+        //             mode: 3
+        //         },
+        //     ])
+        // }
 
         myWallet.address.bounceable = true
         console.log(myWallet.address.toString('base64', true))
 
-        console.log(`\n${BOC.toHexStandard(myWallet.sendTransfersExtMsg())}\n`)
+        console.log(`\n${BOC.toHexStandard(myWallet.deployExtMsg())}\n`)
 
         expect(1).to.equal(1)
     })

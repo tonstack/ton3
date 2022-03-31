@@ -4,7 +4,7 @@ import { MsgTemplate } from '../msg-template'
 import { Address } from '../../address'
 import { KeyPairStruct } from '../../wallet/mnemonic'
 import { Wallet, WalletTransfer } from './wallet'
-import { Hashmap } from '../../boc/hashmap'
+import { HashmapE } from '../../boc/hashmap'
 
 class HighloadWalletV2Contract extends Wallet {
     constructor (
@@ -26,7 +26,7 @@ class HighloadWalletV2Contract extends Wallet {
             .storeUint(this.subWalletID, 32) //     stored_subwallet
             .storeUint(0, 64) //                    last_cleaned
             .storeBytes(keyPair.publicKey) //       public_key
-            .storeBit(0) // old_queries // TODO: replace with storeDict(null)
+            .storeDict(new HashmapE()) //           old_queries
             .cell()
 
         this._stateInit = MsgTemplate.StateInit({ code: this.code, data: initStorage })
@@ -61,8 +61,8 @@ class HighloadWalletV2Contract extends Wallet {
                 })).cell()
         }
 
-        const hashmap = new Hashmap<number, WalletTransfer>({ serializers })
-        this._transfers.forEach((transfer, i) => { hashmap.set(i, transfer) })
+        const dict = new HashmapE<number, WalletTransfer>({ serializers })
+        this._transfers.forEach((transfer, i) => { dict.set(i, transfer) })
         if (cleanUp) { this.cleanUpTransfers() }
 
         return MsgTemplate.MessageX({
@@ -70,8 +70,7 @@ class HighloadWalletV2Contract extends Wallet {
             body: this.addSign(new Builder()
                 .storeUint(this.subWalletID, 32)
                 .storeUint(HighloadWalletV2Contract.genQueryId(timeout), 64)
-                .storeBit(1) // hme_root$1 // TODO: replace with storeDict()
-                .storeRef(hashmap.cell()) //  <=___________________________|
+                .storeDict(dict)
                 .cell())
         })
     }
@@ -84,7 +83,7 @@ class HighloadWalletV2Contract extends Wallet {
                 new Builder()
                     .storeUint(this.subWalletID, 32) // subwallet_id
                     .storeUint(HighloadWalletV2Contract.genQueryId(2 ** 16), 64) // query_id
-                    .storeBit(0) // TODO: replace with storeDict(null)
+                    .storeDict(new HashmapE())
                     .cell()
             )
         })

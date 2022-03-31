@@ -31,7 +31,7 @@ const rollback = (bits: Bit[]): Bit[] => {
         throw new Error('Incorrectly augmented bits.')
     }
 
-    return bits.slice(-(index + 1))
+    return bits.slice(0, -(index + 1))
 }
 
 export {

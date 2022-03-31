@@ -43,7 +43,9 @@ console.log(`\n${BOC.toHexStandard(myWallet.deployExtMsg())}\n`)
 | walletv3 and highload-wallet-v2 support     | ✅      |
 | TL (de)serialization                        | ❌      |
 | Connecting rust ADNL bindings               | ❌      |
+| Old "tonweb" style mnemonic support         | ❌      |
 | ~100% tests coverage                        | ❌      |
+| Pre-release code review                     | ❌      |
 
 ## License
 

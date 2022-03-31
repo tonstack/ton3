@@ -420,7 +420,7 @@ const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
 
     const cells_num = cells_list.length
     const size = cells_num.toString(2).length
-    const size_bytes = Math.min(Math.ceil(size / 8), 1)
+    const size_bytes = Math.max(Math.ceil(size / 8), 1)
     const [ cells_bits, size_index ] = cells_list.reduce<[ Bit[], number[] ]>((acc, cell) => {
         const bits = serializeCell(cell, hashmap)
 

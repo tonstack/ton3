@@ -14,32 +14,45 @@
 - [Address](classes/Address.md)
 - [Builder](classes/Builder.md)
 - [Cell](classes/Cell.md)
+- [Hashmap](classes/Hashmap.md)
+- [HashmapE](classes/HashmapE.md)
 - [BOC](classes/BOC.md)
 - [Slice](classes/Slice.md)
 - [Coins](classes/Coins.md)
 - [MsgTemplate](classes/MsgTemplate.md)
-- [KeyPair](classes/KeyPair.md)
+- [HighloadWalletV2Contract](classes/HighloadWalletV2Contract.md)
+- [WalletV3Contract](classes/WalletV3Contract.md)
+- [Wallet](classes/Wallet.md)
+- [Mnemonic](classes/Mnemonic.md)
 
 ### Interfaces
 
+- [HashmapOptions](interfaces/HashmapOptions.md)
 - [BOCOptions](interfaces/BOCOptions.md)
+- [WalletTransfer](interfaces/WalletTransfer.md)
+- [PrivateKeyStruct](interfaces/PrivateKeyStruct.md)
+- [KeyPairStruct](interfaces/KeyPairStruct.md)
 
 ### Functions
 
 - [deserialize](README.md#deserialize)
 - [serialize](README.md#serialize)
+- [augment](README.md#augment)
+- [rollback](README.md#rollback)
 - [crc16BytesBe](README.md#crc16bytesbe)
 - [crc32cBytesLe](README.md#crc32cbytesle)
+- [hash](README.md#hash)
 - [uint8toInt8](README.md#uint8toint8)
 - [int8ToUint8](README.md#int8touint8)
 - [uintToHex](README.md#uinttohex)
 - [hexToBits](README.md#hextobits)
 - [hexToBytes](README.md#hextobytes)
-- [bitsToHex](README.md#bitstohex)
-- [bitsToBytes](README.md#bitstobytes)
 - [bytesToUint](README.md#bytestouint)
 - [bytesCompare](README.md#bytescompare)
 - [bytesToBits](README.md#bytestobits)
+- [bitsToHex](README.md#bitstohex)
+- [bitsToBytes](README.md#bitstobytes)
+- [bitsToInt8](README.md#bitstoint8)
 - [bytesToHex](README.md#bytestohex)
 - [bytesToString](README.md#bytestostring)
 - [stringToBytes](README.md#stringtobytes)
@@ -51,6 +64,10 @@
 
 - [bip0039en](README.md#bip0039en)
 
+### Variables
+
+- [MnemonicErrors](README.md#mnemonicerrors)
+
 ## Type aliases
 
 ### AddressType
@@ -61,7 +78,7 @@ ___
 
 ### Bit
 
-Ƭ **Bit**: ``0`` \| ``1``
+Ƭ **Bit**: ``1`` \| ``0``
 
 ## Functions
 
@@ -89,12 +106,51 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `root` | [`Cell`](classes/Cell.md) |
+| `root` | [`Cell`](classes/Cell.md)[] |
 | `options` | [`BOCOptions`](interfaces/BOCOptions.md) |
 
 #### Returns
 
 `Uint8Array`
+
+___
+
+### augment
+
+▸ **augment**(`bits`, `divider?`): [`Bit`](README.md#bit)[]
+
+Augment bits with 1 and leading 0 to be divisible by 8 or 4 without remainder.
+Mostly used for BOC serialization or Cell hash calculations.
+
+#### Parameters
+
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `bits` | [`Bit`](README.md#bit)[] | `undefined` | Bits which need to be augmented. |
+| `divider` | ``4`` \| ``8`` | `8` | - |
+
+#### Returns
+
+[`Bit`](README.md#bit)[]
+
+___
+
+### rollback
+
+▸ **rollback**(`bits`): [`Bit`](README.md#bit)[]
+
+Remove augmented bits.
+Mostly used for BOC serialization or Cell hash calculations.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `bits` | [`Bit`](README.md#bit)[] | Bits which needs to be cleared from augmented bits. |
+
+#### Returns
+
+[`Bit`](README.md#bit)[]
 
 ___
 
@@ -127,6 +183,23 @@ ___
 #### Returns
 
 `Uint8Array`
+
+___
+
+### hash
+
+▸ **hash**(`bytes`, `type`): `string`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `bytes` | `Uint8Array` |
+| `type` | ``"sha256"`` \| ``"sha512"`` |
+
+#### Returns
+
+`string`
 
 ___
 
@@ -210,38 +283,6 @@ ___
 
 ___
 
-### bitsToHex
-
-▸ **bitsToHex**(`bits`): `string`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `bits` | [`Bit`](README.md#bit)[] |
-
-#### Returns
-
-`string`
-
-___
-
-### bitsToBytes
-
-▸ **bitsToBytes**(`bits`): `Uint8Array`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `bits` | [`Bit`](README.md#bit)[] |
-
-#### Returns
-
-`Uint8Array`
-
-___
-
 ### bytesToUint
 
 ▸ **bytesToUint**(`bytes`): `number`
@@ -288,6 +329,54 @@ ___
 #### Returns
 
 [`Bit`](README.md#bit)[]
+
+___
+
+### bitsToHex
+
+▸ **bitsToHex**(`bits`): `string`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `bits` | [`Bit`](README.md#bit)[] |
+
+#### Returns
+
+`string`
+
+___
+
+### bitsToBytes
+
+▸ **bitsToBytes**(`bits`): `Uint8Array`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `bits` | [`Bit`](README.md#bit)[] |
+
+#### Returns
+
+`Uint8Array`
+
+___
+
+### bitsToInt8
+
+▸ **bitsToInt8**(`bits`): `number`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `bits` | [`Bit`](README.md#bit)[] |
+
+#### Returns
+
+`number`
 
 ___
 
@@ -391,3 +480,16 @@ ___
 ### bip0039en
 
 • **bip0039en**: `string`[]
+
+## Variables
+
+### MnemonicErrors
+
+• `Const` **MnemonicErrors**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `setPassphrase` | `Error` |
+| `setMnemonic` | `Error` |

@@ -6,7 +6,9 @@
 
 ### Methods
 
+- [IntMsgInfo$0](MsgTemplate.md#intmsginfo$0)
 - [ExtInMsgInfo$10](MsgTemplate.md#extinmsginfo$10)
+- [StateInit](MsgTemplate.md#stateinit)
 - [MessageX](MsgTemplate.md#messagex)
 
 ### Constructors
@@ -15,19 +17,53 @@
 
 ## Methods
 
+### IntMsgInfo$0
+
+▸ `Static` **IntMsgInfo$0**(`options`): [`Cell`](Cell.md)
+
+Creates a new `CommonMsgInfo` with `int_msg_info$0` prefix
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `options` | `IntMsgInfo$0Options` |
+
+#### Returns
+
+[`Cell`](Cell.md)
+
+___
+
 ### ExtInMsgInfo$10
 
-▸ `Static` **ExtInMsgInfo$10**(`dest`, `src?`, `importFee?`): [`Cell`](Cell.md)
+▸ `Static` **ExtInMsgInfo$10**(`options`): [`Cell`](Cell.md)
 
 Creates a new `CommonMsgInfo` with `ext_in_msg_info$10` prefix
 
 #### Parameters
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `dest` | [`Address`](Address.md) | `undefined` |
-| `src` | [`Address`](Address.md) | `Address.NULL` |
-| `importFee` | [`Coins`](Coins.md) | `undefined` |
+| Name | Type |
+| :------ | :------ |
+| `options` | `ExtInMsgInfo$10Options` |
+
+#### Returns
+
+[`Cell`](Cell.md)
+
+___
+
+### StateInit
+
+▸ `Static` **StateInit**(`options`): [`Cell`](Cell.md)
+
+Creates a new simple StateInit without split_depth, special and library
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `options` | `StateInitOptions` |
 
 #### Returns
 
@@ -37,7 +73,7 @@ ___
 
 ### MessageX
 
-▸ `Static` **MessageX**(`info`, `init`, `body`): [`Cell`](Cell.md)
+▸ `Static` **MessageX**(`options`): [`Cell`](Cell.md)
 
  Creates a new MessageX
 
@@ -45,9 +81,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `info` | [`Cell`](Cell.md) |
-| `init` | [`Cell`](Cell.md) |
-| `body` | [`Cell`](Cell.md) |
+| `options` | `MessageXOptions` |
 
 #### Returns
 

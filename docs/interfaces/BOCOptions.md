@@ -6,7 +6,7 @@
 
 ### Properties
 
-- [has\_idx](BOCOptions.md#has_idx)
+- [has\_index](BOCOptions.md#has_index)
 - [hash\_crc32](BOCOptions.md#hash_crc32)
 - [has\_cache\_bits](BOCOptions.md#has_cache_bits)
 - [topological\_order](BOCOptions.md#topological_order)
@@ -14,9 +14,9 @@
 
 ## Properties
 
-### has\_idx
+### has\_index
 
-• `Optional` **has\_idx**: `boolean`
+• `Optional` **has\_index**: `boolean`
 
 ___
 

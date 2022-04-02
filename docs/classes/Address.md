@@ -8,7 +8,7 @@ Smart contract address
 
 ### Properties
 
-- [NULL](Address.md#null)
+- [NONE](Address.md#none)
 
 ### Constructors
 
@@ -28,9 +28,9 @@ Smart contract address
 
 ## Properties
 
-### NULL
+### NONE
 
-▪ `Static` `Readonly` **NULL**: `any` = `null`
+▪ `Static` `Readonly` **NONE**: `any` = `null`
 
 Helper method for writing null addresses to {@link BitArray}
 
@@ -47,19 +47,17 @@ Creates an instance of [Address](Address.md)
 Next formats can be used as constructor argument:
 - Raw
 - Base64
-- Bytes containing Workchain ID and hash part
 - Address
 
 **`example`**
 ```ts
 import { Address } from '@tonstack/tontools'
 
-const bytes = new Uint8Array() // containing Workchain ID and address hash bytes
+const bytes = new Uint8Array() // containing workchain and address hash bytes
 const address = new Address('kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny')
 
 new Address('-1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260')
 new Address('kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny')
-new Address(bytes)
 new Address(address)
 ```
 
@@ -67,7 +65,7 @@ new Address(address)
 
 | Name | Type |
 | :------ | :------ |
-| `address` | `string` \| [`Address`](Address.md) \| `Uint8Array` |
+| `address` | `string` \| [`Address`](Address.md) |
 
 ## Accessors
 
@@ -89,18 +87,6 @@ ___
 
 `number`
 
-• `set` **workchain**(`value`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `value` | `number` |
-
-#### Returns
-
-`void`
-
 ___
 
 ### bounceable
@@ -110,18 +96,6 @@ ___
 #### Returns
 
 `boolean`
-
-• `set` **bounceable**(`value`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `value` | `boolean` |
-
-#### Returns
-
-`void`
 
 ___
 
@@ -133,23 +107,11 @@ ___
 
 `boolean`
 
-• `set` **testOnly**(`value`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `value` | `boolean` |
-
-#### Returns
-
-`void`
-
 ## Methods
 
 ### toString
 
-▸ **toString**(`type?`, `urlSafe?`): `string`
+▸ **toString**(`type?`, `options?`): `string`
 
 Get raw or base64 representation of [Address](Address.md)
 
@@ -162,9 +124,14 @@ const address = new Address(raw)
     .setBounceableFlag(true)
     .setTestOnlyFlag(true)
 
-console.log(address.toString('base64')) // kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
-console.log(address.toString('base64', false)) // kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
-console.log(address.toString('raw')) // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
+console.log(address.toString('base64'))
+// kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny
+
+console.log(address.toString('base64', false))
+// kf/8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15+KsQHFLbKSMiYIny
+
+console.log(address.toString('raw'))
+// -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7a55bd79f8ab101c52db29232260
 ```
 
 #### Parameters
@@ -172,7 +139,7 @@ console.log(address.toString('raw')) // -1:fcb91a3a3816d0f7b8c2c76108b8a9bc5a6b7
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `type` | [`AddressType`](../README.md#addresstype) | `'base64'` |
-| `urlSafe` | `boolean` | `true` |
+| `options?` | `AddressOptions` | `undefined` |
 
 #### Returns
 

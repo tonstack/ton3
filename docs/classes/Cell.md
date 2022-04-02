@@ -20,7 +20,6 @@
 
 - [hash](Cell.md#hash)
 - [print](Cell.md#print)
-- [parse](Cell.md#parse)
 
 ## Accessors
 
@@ -111,13 +110,3 @@ ___
 #### Returns
 
 `string`
-
-___
-
-### parse
-
-▸ **parse**(): [`Slice`](Slice.md)
-
-#### Returns
-
-[`Slice`](Slice.md)

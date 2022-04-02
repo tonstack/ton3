@@ -17,14 +17,24 @@
 
 - [skip](Slice.md#skip)
 - [loadRef](Slice.md#loadref)
+- [preloadRef](Slice.md#preloadref)
 - [loadBit](Slice.md#loadbit)
+- [preloadBit](Slice.md#preloadbit)
 - [loadBits](Slice.md#loadbits)
+- [preloadBits](Slice.md#preloadbits)
 - [loadInt](Slice.md#loadint)
+- [preloadInt](Slice.md#preloadint)
 - [loadUint](Slice.md#loaduint)
+- [preloadUint](Slice.md#preloaduint)
 - [loadBytes](Slice.md#loadbytes)
+- [preloadBytes](Slice.md#preloadbytes)
 - [loadString](Slice.md#loadstring)
+- [preloadString](Slice.md#preloadstring)
 - [loadAddress](Slice.md#loadaddress)
+- [preloadAddress](Slice.md#preloadaddress)
 - [loadCoins](Slice.md#loadcoins)
+- [preloadCoins](Slice.md#preloadcoins)
+- [parse](Slice.md#parse)
 
 ## Accessors
 
@@ -104,7 +114,7 @@ ___
 
 ### loadRef
 
-▸ **loadRef**(`splice?`): [`Cell`](Cell.md)
+▸ **loadRef**(): [`Cell`](Cell.md)
 
 Read ref from [Slice](Slice.md)
 
@@ -122,11 +132,15 @@ const slice = cell.toSlice()
 console.log(slice.readRef()) // Cell
 ```
 
-#### Parameters
+#### Returns
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `splice` | `boolean` | `true` |
+[`Cell`](Cell.md)
+
+___
+
+### preloadRef
+
+▸ **preloadRef**(): [`Cell`](Cell.md)
 
 #### Returns
 
@@ -136,7 +150,7 @@ ___
 
 ### loadBit
 
-▸ **loadBit**(`splice?`): [`Bit`](../README.md#bit)
+▸ **loadBit**(): [`Bit`](../README.md#bit)
 
 Read bit from [Slice](Slice.md)
 
@@ -153,11 +167,15 @@ const slice = cell.toSlice()
 console.log(slice.readBit()) // 1
 ```
 
-#### Parameters
+#### Returns
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `splice` | `boolean` | `true` |
+[`Bit`](../README.md#bit)
+
+___
+
+### preloadBit
+
+▸ **preloadBit**(): [`Bit`](../README.md#bit)
 
 #### Returns
 
@@ -167,7 +185,7 @@ ___
 
 ### loadBits
 
-▸ **loadBits**(`size`, `splice?`): [`Bit`](../README.md#bit)[]
+▸ **loadBits**(`size`): [`Bit`](../README.md#bit)[]
 
 Read bits from [Slice](Slice.md)
 
@@ -186,10 +204,25 @@ console.log(slice.readBits(2)) // [ 0, 1 ]
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `size` | `number` | `undefined` | Total bits should be readed to represent requested value |
-| `splice` | `boolean` | `true` | - |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `size` | `number` | Total bits should be readed to represent requested value |
+
+#### Returns
+
+[`Bit`](../README.md#bit)[]
+
+___
+
+### preloadBits
+
+▸ **preloadBits**(`size`): [`Bit`](../README.md#bit)[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `size` | `number` |
 
 #### Returns
 
@@ -199,7 +232,7 @@ ___
 
 ### loadInt
 
-▸ **loadInt**(`size`, `splice?`): `number`
+▸ **loadInt**(`size`): `number`
 
 Read int from [Slice](Slice.md)
 
@@ -218,10 +251,25 @@ console.log(slice.readUint(15)) // -14
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `size` | `number` | `undefined` | Total bits should be readed to represent requested value |
-| `splice` | `boolean` | `true` | - |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `size` | `number` | Total bits should be readed to represent requested value |
+
+#### Returns
+
+`number`
+
+___
+
+### preloadInt
+
+▸ **preloadInt**(`size`): `number`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `size` | `number` |
 
 #### Returns
 
@@ -231,7 +279,7 @@ ___
 
 ### loadUint
 
-▸ **loadUint**(`size`, `splice?`): `number`
+▸ **loadUint**(`size`): `number`
 
 Read uint from [Slice](Slice.md)
 
@@ -250,10 +298,25 @@ console.log(slice.readUint(9)) // 14
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `size` | `number` | `undefined` | Total bits should be readed to represent requested value |
-| `splice` | `boolean` | `true` | - |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `size` | `number` | Total bits should be readed to represent requested value |
+
+#### Returns
+
+`number`
+
+___
+
+### preloadUint
+
+▸ **preloadUint**(`size`): `number`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `size` | `number` |
 
 #### Returns
 
@@ -263,7 +326,7 @@ ___
 
 ### loadBytes
 
-▸ **loadBytes**(`size`, `splice?`): `Uint8Array`
+▸ **loadBytes**(`size`): `Uint8Array`
 
 Read bytes from [Slice](Slice.md)
 
@@ -282,10 +345,25 @@ console.log(slice.readBytes(16)) // [ 255, 255 ]
 
 #### Parameters
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `size` | `number` | `undefined` |
-| `splice` | `boolean` | `true` |
+| Name | Type |
+| :------ | :------ |
+| `size` | `number` |
+
+#### Returns
+
+`Uint8Array`
+
+___
+
+### preloadBytes
+
+▸ **preloadBytes**(`size`): `Uint8Array`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `size` | `number` |
 
 #### Returns
 
@@ -295,7 +373,7 @@ ___
 
 ### loadString
 
-▸ **loadString**(`size?`, `splice?`): `string`
+▸ **loadString**(`size?`): `string`
 
 Read string from [Slice](Slice.md)
 
@@ -317,7 +395,22 @@ console.log(slice.readString()) // 'Привет, мир!'
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `size` | `number` | `null` |
-| `splice` | `boolean` | `true` |
+
+#### Returns
+
+`string`
+
+___
+
+### preloadString
+
+▸ **preloadString**(`size?`): `string`
+
+#### Parameters
+
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `size` | `number` | `null` |
 
 #### Returns
 
@@ -327,7 +420,7 @@ ___
 
 ### loadAddress
 
-▸ **loadAddress**(`splice?`): [`Address`](Address.md)
+▸ **loadAddress**(): [`Address`](Address.md)
 
 Read [Address](Address.md) from [Slice](Slice.md)
 
@@ -342,14 +435,19 @@ cell.bits.writeAddress(address)
 
 const slice = cell.toSlice()
 
-console.log(slice.readAddress().toString()) // 'kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny'
+console.log(slice.readAddress().toString())
+// 'kf_8uRo6OBbQ97jCx2EIuKm8Wmt6Vb15-KsQHFLbKSMiYIny'
 ```
 
-#### Parameters
+#### Returns
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `splice` | `boolean` | `true` |
+[`Address`](Address.md)
+
+___
+
+### preloadAddress
+
+▸ **preloadAddress**(): [`Address`](Address.md)
 
 #### Returns
 
@@ -359,7 +457,7 @@ ___
 
 ### loadCoins
 
-▸ **loadCoins**(`splice?`): [`Coins`](Coins.md)
+▸ **loadCoins**(): [`Coins`](Coins.md)
 
 Read [Coins](Coins.md) from [Slice](Slice.md)
 
@@ -377,12 +475,42 @@ const slice = cell.toSlice()
 console.log(slice.readCoins().toString()) // '100'
 ```
 
-#### Parameters
+#### Returns
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `splice` | `boolean` | `true` |
+[`Coins`](Coins.md)
+
+___
+
+### preloadCoins
+
+▸ **preloadCoins**(): [`Coins`](Coins.md)
 
 #### Returns
 
 [`Coins`](Coins.md)
+
+___
+
+### parse
+
+▸ `Static` **parse**(`cell`): [`Slice`](Slice.md)
+
+Creates new [Slice](Slice.md) from [Cell](Cell.md)
+
+**`example`**
+```ts
+import { Cell, Slice } from '@tonstack/tontools'
+
+const cell = new Cell()
+const slice = Slice.parse(cell)
+```
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `cell` | [`Cell`](Cell.md) |
+
+#### Returns
+
+[`Slice`](Slice.md)

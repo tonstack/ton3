@@ -73,8 +73,6 @@ class Slice {
     /**
      * Read ref from {@link Slice}
      *
-     * @param {boolean} [splice=true] - Remove bits after reading
-     *
      * @example
      * ```ts
      * import { Cell, Slice } from '@tonstack/tontools'
@@ -91,18 +89,24 @@ class Slice {
      *
      * @return {Cell}
      */
-    public loadRef (splice: boolean = true): Cell {
+    public loadRef (): Cell {
         if (!this._refs.length) {
             throw new Error('Slice: refs overflow.')
         }
 
-        return splice ? this._refs.shift() : this._refs[0]
+        return this._refs.shift()
+    }
+
+    public preloadRef (): Cell {
+        if (!this._refs.length) {
+            throw new Error('Slice: refs overflow.')
+        }
+
+        return this._refs[0]
     }
 
     /**
      * Read bit from {@link Slice}
-     *
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -119,19 +123,26 @@ class Slice {
      *
      * @return {Bit[]}
      */
-    public loadBit (splice: boolean = true): Bit {
+    public loadBit (): Bit {
         if (!this._bits.length) {
             throw new Error('Slice: bits overflow.')
         }
 
-        return splice ? this._bits.shift() : this._bits[0]
+        return this._bits.shift()
+    }
+
+    public preloadBit (): Bit {
+        if (!this._bits.length) {
+            throw new Error('Slice: bits overflow.')
+        }
+
+        return this._bits[0]
     }
 
     /**
      * Read bits from {@link Slice}
      *
      * @param {number} size - Total bits should be readed to represent requested value
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -148,19 +159,26 @@ class Slice {
      *
      * @return {Bit[]}
      */
-    public loadBits (size: number, splice: boolean = true): Bit[] {
+    public loadBits (size: number): Bit[] {
         if (size <= 0 || this._bits.length < size) {
             throw new Error('Slice: bits overflow.')
         }
 
-        return splice ? this._bits.splice(0, size) : this._bits.slice(0, size)
+        return this._bits.splice(0, size)
+    }
+
+    public preloadBits (size: number): Bit[] {
+        if (size <= 0 || this._bits.length < size) {
+            throw new Error('Slice: bits overflow.')
+        }
+
+        return this._bits.slice(0, size)
     }
 
     /**
      * Read int from {@link Slice}
      *
      * @param {number} size - Total bits should be readed to represent requested value
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -177,8 +195,15 @@ class Slice {
      *
      * @return {number}
      */
-    public loadInt (size: number, splice: boolean = true): number {
-        const uint = this.loadUint(size, splice)
+    public loadInt (size: number): number {
+        const uint = this.loadUint(size)
+        const int = 1 << (size - 1)
+
+        return uint >= int ? (uint - (int * 2)) : uint
+    }
+
+    public preloadInt (size: number): number {
+        const uint = this.preloadUint(size)
         const int = 1 << (size - 1)
 
         return uint >= int ? (uint - (int * 2)) : uint
@@ -188,7 +213,6 @@ class Slice {
      * Read uint from {@link Slice}
      *
      * @param {number} size - Total bits should be readed to represent requested value
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -205,16 +229,20 @@ class Slice {
      *
      * @return {number}
      */
-    public loadUint (size: number, splice: boolean = true): number {
-        const bits = this.loadBits(size, splice)
+    public loadUint (size: number): number {
+        const bits = this.loadBits(size)
+
+        return bits.reverse().reduce((acc, bit, i) => (bit * (2 ** i) + acc), 0)
+    }
+
+    public preloadUint (size: number): number {
+        const bits = this.preloadBits(size)
 
         return bits.reverse().reduce((acc, bit, i) => (bit * (2 ** i) + acc), 0)
     }
 
     /**
      * Read bytes from {@link Slice}
-     *
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -231,8 +259,14 @@ class Slice {
      *
      * @return {Uint8Array}
      */
-    public loadBytes (size: number, splice: boolean = true): Uint8Array {
-        const bits = this.loadBits(size, splice)
+    public loadBytes (size: number): Uint8Array {
+        const bits = this.loadBits(size)
+
+        return bitsToBytes(bits)
+    }
+
+    public preloadBytes (size: number): Uint8Array {
+        const bits = this.preloadBits(size)
 
         return bitsToBytes(bits)
     }
@@ -241,7 +275,6 @@ class Slice {
      * Read string from {@link Slice}
      *
      * @param {number} [size=null] - Total bits should be readed to represent requested value
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -258,18 +291,24 @@ class Slice {
      *
      * @return {string}
      */
-    public loadString (size: number = null, splice: boolean = true): string {
+    public loadString (size: number = null): string {
         const bytes = size === null
-            ? this.loadBytes(this._bits.length, splice)
-            : this.loadBytes(size, splice)
+            ? this.loadBytes(this._bits.length)
+            : this.loadBytes(size)
+
+        return bytesToString(bytes)
+    }
+
+    public preloadString (size: number = null): string {
+        const bytes = size === null
+            ? this.preloadBytes(this._bits.length)
+            : this.preloadBytes(size)
 
         return bytesToString(bytes)
     }
 
     /**
      * Read {@link Address} from {@link Slice}
-     *
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -288,21 +327,19 @@ class Slice {
      *
      * @return {Address}
      */
-    public loadAddress (splice: boolean = true): Address | null {
+    public loadAddress (): Address | null {
         const FLAG_ADDRESS_NO = [ 0, 0 ]
         const FLAG_ADDRESS = [ 1, 0 ]
-        const flag = this.loadBits(2, false)
+        const flag = this.preloadBits(2)
 
         if (flag.every((bit, i) => bit === FLAG_ADDRESS_NO[i])) {
-            return splice
-                ? this.skip(2) && Address.NONE
-                : Address.NONE
+            return this.skip(2) && Address.NONE
         }
 
         if (flag.every((bit, i) => bit === FLAG_ADDRESS[i])) {
             // 2 bits flag, 1 bit anycast, 8 bits workchain, 256 bits address hash
             const size = 2 + 1 + 8 + 256
-            const bits = this.loadBits(size, false)
+            const bits = this.preloadBits(size)
             // Splice 2 because we dont need flag bits
             // Anycast is currently unused
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -311,9 +348,34 @@ class Slice {
             const hash = bitsToHex(bits.splice(2, 256))
             const raw = `${workchain}:${hash}`
 
-            return splice
-                ? this.skip(size) && new Address(raw)
-                : new Address(raw)
+            return this.skip(size) && new Address(raw)
+        }
+
+        throw new Error('Slice: bad address flag bits.')
+    }
+
+    public preloadAddress (): Address | null {
+        const FLAG_ADDRESS_NO = [ 0, 0 ]
+        const FLAG_ADDRESS = [ 1, 0 ]
+        const flag = this.preloadBits(2)
+
+        if (flag.every((bit, i) => bit === FLAG_ADDRESS_NO[i])) {
+            return Address.NONE
+        }
+
+        if (flag.every((bit, i) => bit === FLAG_ADDRESS[i])) {
+            // 2 bits flag, 1 bit anycast, 8 bits workchain, 256 bits address hash
+            const size = 2 + 1 + 8 + 256
+            const bits = this.preloadBits(size)
+            // Splice 2 because we dont need flag bits
+            // Anycast is currently unused
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const anycast = bits.splice(2, 1)
+            const workchain = bitsToInt8(bits.splice(2, 8))
+            const hash = bitsToHex(bits.splice(2, 256))
+            const raw = `${workchain}:${hash}`
+
+            return new Address(raw)
         }
 
         throw new Error('Slice: bad address flag bits.')
@@ -321,8 +383,6 @@ class Slice {
 
     /**
      * Read {@link Coins} from {@link Slice}
-     *
-     * @param {boolean} [splice=true] - Remove bits after reading
      *
      * @example
      * ```ts
@@ -340,22 +400,32 @@ class Slice {
      *
      * @return {Coins}
      */
-    public loadCoins (splice: boolean = true): Coins {
-        const length = this.loadUint(4, false)
+    public loadCoins (): Coins {
+        const length = this.preloadUint(4)
 
         if (length === 0) {
-            return splice
-                ? this.skip(4) && new Coins(0)
-                : new Coins(0)
+            return this.skip(4) && new Coins(0)
         }
 
         const size = 4 + (length * 8)
-        const bits = this.loadBits(size, false)
+        const bits = this.preloadBits(size)
         const hex = `0x${bitsToHex(bits.splice(4))}`
 
-        return splice
-            ? this.skip(size) && new Coins(hex, true)
-            : new Coins(hex, true)
+        return this.skip(size) && new Coins(hex, true)
+    }
+
+    public preloadCoins (): Coins {
+        const length = this.preloadUint(4)
+
+        if (length === 0) {
+            return new Coins(0)
+        }
+
+        const size = 4 + (length * 8)
+        const bits = this.preloadBits(size)
+        const hex = `0x${bitsToHex(bits.splice(4))}`
+
+        return new Coins(hex, true)
     }
 }
 

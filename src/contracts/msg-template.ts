@@ -2,6 +2,7 @@ import { Address } from '../address'
 import { Coins } from '../coins'
 import { Cell } from '../boc/cell'
 import { Builder } from '../boc/builder'
+import { Slice } from '../boc/slice'
 
 interface IntMsgInfo$0Options {
     ihrDisabled?: boolean // optional, because it is not currently implemented in TON
@@ -116,7 +117,7 @@ class MsgTemplate {
         const { info, init, body } = options
         const message = new Builder()
 
-        message.storeSlice(info.parse())
+        message.storeSlice(Slice.parse(info))
 
         if (init) {
             message.storeBit(1)
@@ -127,7 +128,7 @@ class MsgTemplate {
                 && message.refs.length + init.refs.length <= 4
             ) {
                 message.storeBit(0)
-                    .storeSlice(init.parse())
+                    .storeSlice(Slice.parse(init))
             } else {
                 message.storeBit(1)
                     .storeRef(init)
@@ -142,7 +143,7 @@ class MsgTemplate {
                 && message.refs.length + body.refs.length <= 4
             ) {
                 message.storeBit(0)
-                    .storeSlice(body.parse())
+                    .storeSlice(Slice.parse(body))
             } else {
                 message.storeBit(1)
                     .storeRef(body)

@@ -1,4 +1,3 @@
-import { Slice } from './slice'
 import {
     bitsToBytes,
     bitsToHex,
@@ -119,11 +118,6 @@ class Cell {
         this._refs.forEach(ref => output.push(ref.print(`${indent} `)))
 
         return output.join('')
-    }
-
-    public parse (): Slice {
-        // Use getters to get a copy of an arrays
-        return new Slice(this.bits, this.refs)
     }
 }
 

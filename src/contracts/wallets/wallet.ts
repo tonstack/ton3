@@ -1,4 +1,5 @@
-import { Coins } from 'coins'
+import { Coins } from '../../coins'
+import { Slice } from '../../boc/slice'
 import { KeyPairStruct } from '../../wallet/mnemonic'
 import { Builder, Cell } from '../../boc'
 import { Address } from '../../address'
@@ -69,7 +70,7 @@ class Wallet {
     protected addSign (msg: Cell): Cell {
         return new Builder()
             .storeBytes(this.signMsg(msg))
-            .storeSlice(msg.parse())
+            .storeSlice(Slice.parse(msg))
             .cell()
     }
 }

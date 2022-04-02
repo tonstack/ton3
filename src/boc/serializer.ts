@@ -2,6 +2,7 @@
 
 import { Cell } from './cell'
 import { Builder } from './builder'
+import { Slice } from './slice'
 import {
     hexToBytes,
     bytesToUint,
@@ -264,7 +265,7 @@ const deserialize = (data: Uint8Array): Cell[] => {
         .forEach((i) => {
             const pointerIndex = parseInt(i, 10)
             const pointer = pointers[pointerIndex]
-            const builder = new Builder().storeSlice(pointer.cell.parse())
+            const builder = new Builder().storeSlice(Slice.parse(pointer.cell))
 
             pointer.refIndexes.forEach((refIndex) => {
                 const ref = pointers[refIndex].cell

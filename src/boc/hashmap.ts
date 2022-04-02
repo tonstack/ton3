@@ -1,9 +1,10 @@
 /* eslint-disable max-classes-per-file */
 
 import { Builder } from './builder'
-import { Cell } from './cell'
+import { Slice } from './slice'
+import type { Cell } from './cell'
 
-interface HashmapOptions<K, V> {
+export interface HashmapOptions<K, V> {
     keySize?: number | 'auto'
     prefixed?: boolean | 'auto'
     nonEmpty?: boolean
@@ -22,11 +23,7 @@ type HashmapNode = [ key: Bit[], value: Cell ]
 class Hashmap<K = Bit[], V = Cell> {
     protected hashmap: Map<string, Cell>
 
-    protected keySize: number | 'auto'
-
-    protected prefixed: boolean | 'auto'
-
-    protected nonEmpty: boolean
+    protected keySize: number
 
     protected serializeKey: (key: K) => Bit[]
 
@@ -36,19 +33,14 @@ class Hashmap<K = Bit[], V = Cell> {
 
     protected deserializeValue: (value: Cell) => V
 
-    constructor (options?: HashmapOptions<K, V>) {
+    constructor (keySize: number, options?: HashmapOptions<K, V>) {
         const {
-            keySize = 'auto',
-            prefixed = 'auto',
-            nonEmpty = false,
             serializers = { key: (key: K) => key, value: (value: V) => value },
             deserializers = { key: (key: Bit[]) => key, value: (value: Cell) => value }
         } = options || {}
 
         this.hashmap = new Map<string, Cell>()
         this.keySize = keySize
-        this.prefixed = prefixed
-        this.nonEmpty = nonEmpty
         this.serializeKey = serializers.key as (key: K) => Bit[]
         this.serializeValue = serializers.value as (value: V) => Cell
         this.deserializeKey = deserializers.key as (key: Bit[]) => K
@@ -65,68 +57,58 @@ class Hashmap<K = Bit[], V = Cell> {
         }
     }
 
-    protected sortHashmap (): { sorted: HashmapNode[], prefixed: boolean } {
-        const {
-            sorted,
-            keySizeMin,
-            keySizeMax,
-            valueSizeMax,
-            valueHasRefs
-        } = [ ...this.hashmap ].reduce((acc, [ bitstring, value ]) => {
+    public set (key: K, value: V): this {
+        const k = this.serializeKey(key).join('')
+        const v = this.serializeValue(value)
+
+        this.hashmap.set(k, v)
+
+        return this
+    }
+
+    public setRaw (key: Bit[], value: Cell): this {
+        this.hashmap.set(key.join(''), value)
+
+        return this
+    }
+
+    public get (key: K): V {
+        const k = this.serializeKey(key).join('')
+        const v = this.hashmap.get(k)
+
+        return v !== undefined
+            ? this.deserializeValue(v)
+            : undefined
+    }
+
+    public getRaw (key: Bit[]): Cell {
+        return this.hashmap.get(key.join(''))
+    }
+
+    protected sortHashmap (): HashmapNode[] {
+        const sorted = [ ...this.hashmap ].reduce((acc, [ bitstring, value ]) => {
             const key = bitstring.split('').map(b => Number(b) as Bit)
-            const keyLength = key.length
-            const valueLength = value.bits.length
-            const hasRefs = value.refs.length !== 0
             // Sort keys by DESC to serialize labels correctly later
             const order = parseInt(bitstring, 2)
-            const lt = acc.sorted.findIndex(el => order > el.order)
-            const index = lt > -1 ? lt : acc.sorted.length
+            const lt = acc.findIndex(el => order > el.order)
+            const index = lt > -1 ? lt : acc.length
 
-            acc.sorted.splice(index, 0, { order, key, value })
-            acc.keySizeMin = keyLength < acc.keySizeMin ? keyLength : acc.keySizeMin
-            acc.keySizeMax = keyLength > acc.keySizeMax ? keyLength : acc.keySizeMax
-            acc.valueSizeMax = valueLength > acc.valueSizeMax ? valueLength : acc.valueSizeMax
-            acc.valueHasRefs = !acc.valueHasRefs ? hasRefs : acc.valueHasRefs
+            acc.splice(index, 0, { order, key, value })
 
             return acc
-        }, {
-            sorted: [] as { order: number, key: Bit[], value: Cell }[],
-            keySizeMin: 1023,
-            keySizeMax: 0,
-            valueSizeMax: 0,
-            valueHasRefs: false
-        })
+        }, [] as { order: number, key: Bit[], value: Cell }[])
 
-        const isPrefixHashmapType = valueHasRefs
-            || keySizeMin !== keySizeMax
-            || (keySizeMax + valueSizeMax) > 1023
-
-        if (this.keySize !== 'auto' && keySizeMin !== keySizeMax) {
-            throw new Error(`Hashmap: keys size must be fixed length of ${this.keySize}.`)
-        }
-
-        if (this.keySize !== 'auto' && (keySizeMin !== this.keySize || keySizeMax !== this.keySize)) {
-            throw new Error(`Hashmap: keys size must be fixed length of ${this.keySize}.`)
-        }
-
-        if (this.prefixed === false && isPrefixHashmapType) {
-            throw new Error('Hashmap: provided keys and values can fit only in prefixed hashmap.')
-        }
-
-        return {
-            sorted: sorted.map(el => [ el.key, el.value ]),
-            prefixed: this.prefixed === 'auto' ? isPrefixHashmapType : this.prefixed
-        }
+        return sorted.map(el => [ el.key, el.value ])
     }
 
     protected serialize (): Cell {
-        const { sorted } = this.sortHashmap()
+        const nodes = this.sortHashmap()
 
-        if (sorted.length === 0) {
-            throw new Error('Hashmap: must contain at least 1 key-value pair.')
+        if (nodes.length === 0) {
+            throw new Error('Hashmap: can\'t be empty. It must contain at least 1 key-value pair.')
         }
 
-        return Hashmap.serializeEdge(sorted)
+        return Hashmap.serializeEdge(nodes)
     }
 
     protected static serializeEdge (nodes: HashmapNode[]): Cell {
@@ -146,7 +128,7 @@ class Hashmap<K = Bit[], V = Cell> {
         if (nodes.length === 1) {
             const leaf = this.serializeLeaf(nodes[0])
 
-            edge.storeSlice(leaf.parse())
+            edge.storeSlice(Slice.parse(leaf))
         }
 
         // hmn_fork#_
@@ -276,39 +258,109 @@ class Hashmap<K = Bit[], V = Cell> {
         return label.bits
     }
 
-    public set (key: K, value: V): this {
-        const k = this.serializeKey(key).join('')
-        const v = this.serializeValue(value)
+    protected static deserialize<K, V> (
+        slice: Slice,
+        keySize: number,
+        options?: HashmapOptions<K, V>
+    ): Hashmap<K, V> {
+        if (slice.bits.length < 2) {
+            throw new Error('Hashmap: can\'t be empty. It must contain at least 1 key-value pair.')
+        }
 
-        this.hashmap.set(k, v)
+        const hashmap = new Hashmap(keySize, options)
+        const nodes = Hashmap.deserializeEdge(slice, keySize)
 
-        return this
+        for (let i = 0; i < nodes.length; i += 1) {
+            const [ key, value ] = nodes[i]
+
+            hashmap.setRaw(key, value)
+        }
+
+        return hashmap
     }
 
-    public get (key: K): V {
-        const k = this.serializeKey(key).join('')
-        const v = this.hashmap.get(k)
+    protected static deserializeEdge (
+        edge: Slice,
+        keySize: number,
+        key: Bit[] = []
+    ): HashmapNode[] {
+        const nodes: HashmapNode[] = []
 
-        return v !== undefined
-            ? this.deserializeValue(v)
-            : undefined
+        key.push(...this.deserializeLabel(edge, keySize - key.length))
+
+        if (key.length === keySize) {
+            const value = new Builder().storeSlice(edge).cell()
+
+            return nodes.concat([ [ key, value ] ])
+        }
+
+        return edge.refs.reduce((acc, _r, i) => {
+            const forkEdge = Slice.parse(edge.loadRef())
+            const forkKey = key.concat([ i as Bit ])
+
+            return acc.concat(this.deserializeEdge(forkEdge, keySize, forkKey))
+        }, [])
+    }
+
+    protected static deserializeLabel (edge: Slice, m: number): Bit[] {
+        // m = length at most possible bits of n (key)
+
+        // hml_short$0
+        if (edge.loadBit() === 0) {
+            return this.deserializeLabelShort(edge)
+        }
+
+        // hml_long$10
+        if (edge.loadBit() === 0) {
+            return this.deserializeLabelLong(edge, m)
+        }
+
+        // hml_same$11
+        return this.deserializeLabelSame(edge, m)
+    }
+
+    protected static deserializeLabelShort (edge: Slice): Bit[] {
+        const length = edge.bits.findIndex(b => b === 0)
+
+        return edge.skip(length + 1) && edge.loadBits(length)
+    }
+
+    protected static deserializeLabelLong (edge: Slice, m: number): Bit[] {
+        const length = edge.loadUint(Math.ceil(Math.log2(m + 1)))
+
+        return edge.loadBits(length)
+    }
+
+    protected static deserializeLabelSame (edge: Slice, m: number): Bit[] {
+        const repeated = edge.loadBit()
+        const length = edge.loadUint(Math.ceil(Math.log2(m + 1)))
+
+        return [ ...Array(length) ].map(() => repeated)
     }
 
     public cell (): Cell {
         return this.serialize()
     }
+
+    public static parse<K = Bit[], V = Cell> (
+        slice: Slice,
+        keySize: number,
+        options?: HashmapOptions<K, V>
+    ): Hashmap<K, V> {
+        return this.deserialize<K, V>(slice, keySize, options)
+    }
 }
 
 class HashmapE<K = Bit[], V = Cell> extends Hashmap<K, V> {
-    constructor (options?: HashmapOptions<K, V>) {
-        super(options)
+    constructor (keySize: number, options?: HashmapOptions<K, V>) {
+        super(keySize, options)
     }
 
     protected serialize (): Cell {
-        const { sorted } = this.sortHashmap()
+        const nodes = this.sortHashmap()
         const result = new Builder()
 
-        if (!sorted.length) {
+        if (!nodes.length) {
             return result
                 .storeBit(0)
                 .cell()
@@ -316,8 +368,41 @@ class HashmapE<K = Bit[], V = Cell> extends Hashmap<K, V> {
 
         return result
             .storeBit(1)
-            .storeRef(HashmapE.serializeEdge(sorted))
+            .storeRef(HashmapE.serializeEdge(nodes))
             .cell()
+    }
+
+    protected static deserialize<K, V> (
+        slice: Slice,
+        keySize: number,
+        options?: HashmapOptions<K, V>
+    ): HashmapE<K, V> {
+        if (slice.bits.length !== 1) {
+            throw new Error('HashmapE: bad hashmap size flag.')
+        }
+
+        if (slice.loadBit() === 0) {
+            return new HashmapE<K, V>(keySize, options)
+        }
+
+        const hashmap = new HashmapE<K, V>(keySize, options)
+        const nodes = Hashmap.deserializeEdge(slice, keySize)
+
+        for (let i = 0; i < nodes.length; i += 1) {
+            const [ key, value ] = nodes[i]
+
+            hashmap.setRaw(key, value)
+        }
+
+        return hashmap
+    }
+
+    public static parse<K = Bit[], V = Cell> (
+        slice: Slice,
+        keySize: number,
+        options?: HashmapOptions<K, V>
+    ): HashmapE<K, V> {
+        return this.deserialize<K, V>(slice, keySize, options)
     }
 }
 

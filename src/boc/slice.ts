@@ -160,7 +160,7 @@ class Slice {
      * @return {Bit[]}
      */
     public loadBits (size: number): Bit[] {
-        if (size <= 0 || this._bits.length < size) {
+        if (size < 0 || this._bits.length < size) {
             throw new Error('Slice: bits overflow.')
         }
 
@@ -168,7 +168,7 @@ class Slice {
     }
 
     public preloadBits (size: number): Bit[] {
-        if (size <= 0 || this._bits.length < size) {
+        if (size < 0 || this._bits.length < size) {
             throw new Error('Slice: bits overflow.')
         }
 
@@ -426,6 +426,23 @@ class Slice {
         const hex = `0x${bitsToHex(bits.splice(4))}`
 
         return new Coins(hex, true)
+    }
+
+    /**
+     * Creates new {@link Slice} from {@link Cell}
+     *
+     * @example
+     * ```ts
+     * import { Cell, Slice } from '@tonstack/tontools'
+     *
+     * const cell = new Cell()
+     * const slice = Slice.parse(cell)
+     * ```
+     *
+     * @return {Coins}
+     */
+    public static parse (cell: Cell): Slice {
+        return new Slice(cell.bits, cell.refs)
     }
 }
 

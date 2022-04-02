@@ -26,7 +26,7 @@ class HighloadWalletV2Contract extends Wallet {
             .storeUint(this.subWalletID, 32) //     stored_subwallet
             .storeUint(0, 64) //                    last_cleaned
             .storeBytes(keyPair.publicKey) //       public_key
-            .storeDict(new HashmapE()) //           old_queries
+            .storeDict(new HashmapE(16)) //           old_queries
             .cell()
 
         this._stateInit = MsgTemplate.StateInit({ code: this.code, data: initStorage })
@@ -63,7 +63,7 @@ class HighloadWalletV2Contract extends Wallet {
                 })).cell()
         }
 
-        const dict = new HashmapE<number, WalletTransfer>({ serializers })
+        const dict = new HashmapE<number, WalletTransfer>(16, { serializers })
         this._transfers.forEach((transfer, i) => { dict.set(i, transfer) })
         if (cleanUp) { this.cleanUpTransfers() }
 
@@ -85,7 +85,7 @@ class HighloadWalletV2Contract extends Wallet {
                 new Builder()
                     .storeUint(this.subWalletID, 32) // subwallet_id
                     .storeUint(HighloadWalletV2Contract.genQueryId(2 ** 16), 64) // query_id
-                    .storeDict(new HashmapE())
+                    .storeDict(new HashmapE(16))
                     .cell()
             )
         })

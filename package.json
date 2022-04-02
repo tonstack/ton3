@@ -5,8 +5,8 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "mocha './test/**/*.ts' --require ts-node/register",
-    "coverage": "nyc --all mocha './test/**/*.ts' --require ts-node/register",
+    "test": "mocha './test/**/*.test.ts' --require ts-node/register",
+    "coverage": "nyc --all mocha './test/**/*.test.ts' --require ts-node/register",
     "build:doc": "typedoc"
   },
   "author": "TonStack",

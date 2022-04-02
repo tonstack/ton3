@@ -1,5 +1,5 @@
 import { Cell } from './cell'
-import type { Slice } from './slice'
+import { Slice } from './slice'
 import type { Address } from '../address'
 import type { Coins } from '../coins'
 import type { HashmapE } from './hashmap'
@@ -247,21 +247,6 @@ class Builder {
     }
 
     /**
-     * Store a {@link HashmapE} in instance.
-     *
-     * @param {HashmapE} hashmap - HashmapE.
-     * @return {this}
-     */
-    public storeDict (hashmap: HashmapE<any, any>): this {
-        const slice = hashmap.cell()
-            .parse()
-
-        this.storeSlice(slice)
-
-        return this
-    }
-
-    /**
      * Store a {@link Coins} in instance.
      *
      * @param {Coins} coins - Toncoin as {@link Coins}.
@@ -286,6 +271,20 @@ class Builder {
         this.checkBitsOverflow(coinsBitsSize)
         this.storeUint(length, 4)
         this.storeUint(nano, size)
+
+        return this
+    }
+
+    /**
+     * Store a {@link HashmapE} in instance.
+     *
+     * @param {HashmapE} hashmap - HashmapE.
+     * @return {this}
+     */
+    public storeDict (hashmap: HashmapE<any, any>): this {
+        const slice = Slice.parse(hashmap.cell())
+
+        this.storeSlice(slice)
 
         return this
     }

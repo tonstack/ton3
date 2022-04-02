@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { TextEncoder } from 'util'
-import { Cell, Builder } from '../src/boc'
+import { Cell, Builder, Slice } from '../src/boc'
 import { bytesToBits } from '../src/utils/helpers'
 import { Address } from '../src/address'
 import { Coins } from '../src/coins'
@@ -105,26 +105,24 @@ describe('Builder', () => {
     describe('#storeSlice()', () => {
         it('should store Slice', () => {
             const ref = new Builder().cell()
-            const slice = new Builder()
+            const cell = new Builder()
                 .storeBits([ 0, 1 ])
                 .storeRef(ref)
                 .cell()
-                .parse()
 
-            builder.storeSlice(slice)
+            builder.storeSlice(Slice.parse(cell))
 
             expect(builder.bits).to.eql([ 0, 1 ])
             expect(builder.refs.length).to.eq(1)
         })
 
         it('should throw error on overflow bits', () => {
-            const builder = new Builder(3).storeBits([ 0, 1 ])
-            const slice = new Builder()
+            const builder1 = new Builder(3).storeBits([ 0, 1 ])
+            const cell = new Builder()
                 .storeBits([ 0, 1 ])
                 .cell()
-                .parse()
 
-            const result = () => builder.storeSlice(slice)
+            const result = () => builder1.storeSlice(Slice.parse(cell))
 
             expect(result).to.throw('Builder: bits overflow. Can\'t add 2 bits. Only 1 bits left.')
         })
@@ -136,13 +134,12 @@ describe('Builder', () => {
                 .storeRef(ref)
                 .storeRef(ref)
 
-            const slice = new Builder()
+            const cell = new Builder()
                 .storeRef(ref)
                 .storeRef(ref)
                 .cell()
-                .parse()
 
-            const result = () => builder.storeSlice(slice)
+            const result = () => builder.storeSlice(Slice.parse(cell))
 
             expect(result).to.throw('Builder: refs overflow. Can\'t add 2 refs. Only 1 refs left.')
         })
@@ -193,8 +190,8 @@ describe('Builder', () => {
         })
 
         it('should throw error on overflow', () => {
-            const builder = new Builder(1).storeBit(1)
-            const result = () => builder.storeBit(1)
+            const builder1 = new Builder(1).storeBit(1)
+            const result = () => builder1.storeBit(1)
 
             expect(result).to.throw('Builder: bits overflow. Can\'t add 1 bits. Only 0 bits left.')
         })
@@ -210,8 +207,8 @@ describe('Builder', () => {
         })
 
         it('should throw error on overflow', () => {
-            const builder = new Builder(4).storeBits([ 1, 0, 1, 0 ])
-            const result = () => builder.storeBits([ 1, 0 ])
+            const builder1 = new Builder(4).storeBits([ 1, 0, 1, 0 ])
+            const result = () => builder1.storeBits([ 1, 0 ])
 
             expect(result).to.throw('Builder: bits overflow. Can\'t add 2 bits. Only 0 bits left.')
         })
@@ -285,8 +282,9 @@ describe('Builder', () => {
             const raw = '0:FCB91A3A3816D0F7B8C2C76108B8A9BC5A6B7A55BD79F8AB101C52DB29232260'
             const address = new Address(raw)
             const result = builder.storeAddress(address)
+            const flags = [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 
-            expect(result.bits).to.eql([ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...bytesToBits(address.hash) ])
+            expect(result.bits).to.eql([ ...flags, ...bytesToBits(address.hash) ])
         })
 
         it('should store null Address', () => {
@@ -300,9 +298,7 @@ describe('Builder', () => {
     describe('#storeCoins()', () => {
         it('should store Coins', () => {
             const coins = new Coins('100.5')
-            const result = builder.storeCoins(coins)
-                .cell()
-                .parse()
+            const result = Slice.parse(builder.storeCoins(coins).cell())
                 .loadCoins()
 
             expect(result.toString()).to.eql(coins.toString())
@@ -327,22 +323,22 @@ describe('Builder', () => {
     describe('#clone()', () => {
         it('should clone Builder', () => {
             const ref = new Builder().cell()
-            const builder = new Builder(6).storeBits([ 0, 1, 0, 1 ]).storeRef(ref)
-            const result = builder.clone()
+            const builder1 = new Builder(6).storeBits([ 0, 1, 0, 1 ]).storeRef(ref)
+            const result = builder1.clone()
 
-            expect(result.size).to.eq(builder.size)
-            expect(result.bits).to.eql(builder.bits)
-            expect(result.bits.length).to.eq(builder.bits.length)
-            expect(result.refs).to.eql(builder.refs)
-            expect(result.refs.length).to.eq(builder.refs.length)
+            expect(result.size).to.eq(builder1.size)
+            expect(result.bits).to.eql(builder1.bits)
+            expect(result.bits.length).to.eq(builder1.bits.length)
+            expect(result.refs).to.eql(builder1.refs)
+            expect(result.refs.length).to.eq(builder1.refs.length)
 
-            builder.storeBits([ 0, 1 ])
+            builder1.storeBits([ 0, 1 ])
                 .storeRef(ref)
 
-            expect(result.bits).to.not.eql(builder.bits)
-            expect(result.bits.length).to.not.eq(builder.bits.length)
-            expect(result.refs).to.not.eql(builder.refs)
-            expect(result.refs.length).to.not.eq(builder.refs.length)
+            expect(result.bits).to.not.eql(builder1.bits)
+            expect(result.bits.length).to.not.eq(builder1.bits.length)
+            expect(result.refs).to.not.eql(builder1.refs)
+            expect(result.refs.length).to.not.eq(builder1.refs.length)
         })
     })
 

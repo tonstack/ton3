@@ -14,6 +14,8 @@
 - [fromStandard](BOC.md#fromstandard)
 - [toBytes](BOC.md#tobytes)
 - [toBytesStandard](BOC.md#tobytesstandard)
+- [toBase64](BOC.md#tobase64)
+- [toBase64Standard](BOC.md#tobase64standard)
 - [toHex](BOC.md#tohex)
 - [toHexStandard](BOC.md#tohexstandard)
 
@@ -37,7 +39,7 @@ Returns deserialized BOC root cells.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `data` | `string` \| `Uint8Array` | Bytes or HEX of serialized BOC. |
+| `data` | `string` \| `Uint8Array` | Bytes, HEX or Base64 of serialized BOC. |
 
 #### Returns
 
@@ -104,6 +106,48 @@ Returns serialized standard BOC in bytes representation.
 #### Returns
 
 `Uint8Array`
+
+___
+
+### toBase64
+
+▸ `Static` **toBase64**(`cells`, `options?`): `string`
+
+Returns serialized BOC in base64 representation.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cells` | [`Cell`](Cell.md)[] | Root cells. |
+| `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
+
+#### Returns
+
+`string`
+
+___
+
+### toBase64Standard
+
+▸ `Static` **toBase64Standard**(`cell`, `options?`): `string`
+
+Returns serialized standard BOC in base64 representation.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cell` | [`Cell`](Cell.md) | Root cell. |
+| `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
+
+#### Returns
+
+`string`
 
 ___
 

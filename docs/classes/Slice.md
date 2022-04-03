@@ -9,10 +9,6 @@
 - [bits](Slice.md#bits)
 - [refs](Slice.md#refs)
 
-### Constructors
-
-- [constructor](Slice.md#constructor)
-
 ### Methods
 
 - [skip](Slice.md#skip)
@@ -55,29 +51,6 @@ ___
 #### Returns
 
 [`Cell`](Cell.md)[]
-
-## Constructors
-
-### constructor
-
-• **new Slice**(`bits`, `refs`)
-
-Creates an instance of [Slice](Slice.md)
-
-**`example`**
-```ts
-import { Cell, Slice } from '@tonstack/tontools'
-
-const cell = new Cell()
-const slice = new Slice(cell)
-```
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `bits` | [`Bit`](../README.md#bit)[] |
-| `refs` | [`Cell`](Cell.md)[] |
 
 ## Methods
 

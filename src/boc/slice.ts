@@ -27,7 +27,7 @@ class Slice {
      * const slice = new Slice(cell)
      * ```
      */
-    constructor (bits: Bit[], refs: Cell[]) {
+    private constructor (bits: Bit[], refs: Cell[]) {
         this._bits = bits
         this._refs = refs
     }

@@ -57,21 +57,6 @@ class Hashmap<K = Bit[], V = Cell> {
         }
     }
 
-    public set (key: K, value: V): this {
-        const k = this.serializeKey(key).join('')
-        const v = this.serializeValue(value)
-
-        this.hashmap.set(k, v)
-
-        return this
-    }
-
-    public setRaw (key: Bit[], value: Cell): this {
-        this.hashmap.set(key.join(''), value)
-
-        return this
-    }
-
     public get (key: K): V {
         const k = this.serializeKey(key).join('')
         const v = this.hashmap.get(k)
@@ -81,8 +66,79 @@ class Hashmap<K = Bit[], V = Cell> {
             : undefined
     }
 
-    public getRaw (key: Bit[]): Cell {
+    public has (key: K): boolean {
+        return this.get(key) !== undefined
+    }
+
+    public set (key: K, value: V): this {
+        const k = this.serializeKey(key).join('')
+        const v = this.serializeValue(value)
+
+        this.hashmap.set(k, v)
+
+        return this
+    }
+
+    public add (key: K, value: V): this {
+        return !this.has(key)
+            ? this.set(key, value)
+            : this
+    }
+
+    public replace (key: K, value: V): this {
+        return this.has(key)
+            ? this.set(key, value)
+            : this
+    }
+
+    public getSet (key: K, value: V): V {
+        const prev = this.get(key)
+
+        this.set(key, value)
+
+        return prev
+    }
+
+    public getAdd (key: K, value: V): V {
+        const prev = this.get(key)
+
+        this.add(key, value)
+
+        return prev
+    }
+
+    public getReplace (key: K, value: V): V {
+        const prev = this.get(key)
+
+        this.replace(key, value)
+
+        return prev
+    }
+
+    public delete (key: K): this {
+        const k = this.serializeKey(key).join('')
+
+        this.hashmap.delete(k)
+
+        return this
+    }
+
+    public isEmpty (): boolean {
+        return this.hashmap.size === 0
+    }
+
+    public forEach (callbackfn: (key: K, value: V) => void): void {
+        return [ ...this ].forEach(([ key, value ]) => callbackfn(key, value))
+    }
+
+    protected getRaw (key: Bit[]): Cell {
         return this.hashmap.get(key.join(''))
+    }
+
+    protected setRaw (key: Bit[], value: Cell): this {
+        this.hashmap.set(key.join(''), value)
+
+        return this
     }
 
     protected sortHashmap (): HashmapNode[] {

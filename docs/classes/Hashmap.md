@@ -20,10 +20,17 @@
 ### Methods
 
 - [[iterator]](Hashmap.md#[iterator])
-- [set](Hashmap.md#set)
-- [setRaw](Hashmap.md#setraw)
 - [get](Hashmap.md#get)
-- [getRaw](Hashmap.md#getraw)
+- [has](Hashmap.md#has)
+- [set](Hashmap.md#set)
+- [add](Hashmap.md#add)
+- [replace](Hashmap.md#replace)
+- [getSet](Hashmap.md#getset)
+- [getAdd](Hashmap.md#getadd)
+- [getReplace](Hashmap.md#getreplace)
+- [delete](Hashmap.md#delete)
+- [isEmpty](Hashmap.md#isempty)
+- [forEach](Hashmap.md#foreach)
 - [cell](Hashmap.md#cell)
 - [parse](Hashmap.md#parse)
 
@@ -40,6 +47,38 @@
 #### Returns
 
 `IterableIterator`<[`K`, `V`]\>
+
+___
+
+### get
+
+▸ **get**(`key`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+
+#### Returns
+
+`V`
+
+___
+
+### has
+
+▸ **has**(`key`): `boolean`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+
+#### Returns
+
+`boolean`
 
 ___
 
@@ -60,16 +99,16 @@ ___
 
 ___
 
-### setRaw
+### add
 
-▸ **setRaw**(`key`, `value`): [`Hashmap`](Hashmap.md)<`K`, `V`\>
+▸ **add**(`key`, `value`): [`Hashmap`](Hashmap.md)<`K`, `V`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `key` | [`Bit`](../README.md#bit)[] |
-| `value` | [`Cell`](Cell.md) |
+| `key` | `K` |
+| `value` | `V` |
 
 #### Returns
 
@@ -77,9 +116,77 @@ ___
 
 ___
 
-### get
+### replace
 
-▸ **get**(`key`): `V`
+▸ **replace**(`key`, `value`): [`Hashmap`](Hashmap.md)<`K`, `V`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+[`Hashmap`](Hashmap.md)<`K`, `V`\>
+
+___
+
+### getSet
+
+▸ **getSet**(`key`, `value`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+`V`
+
+___
+
+### getAdd
+
+▸ **getAdd**(`key`, `value`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+`V`
+
+___
+
+### getReplace
+
+▸ **getReplace**(`key`, `value`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+`V`
+
+___
+
+### delete
+
+▸ **delete**(`key`): [`Hashmap`](Hashmap.md)<`K`, `V`\>
 
 #### Parameters
 
@@ -89,23 +196,33 @@ ___
 
 #### Returns
 
-`V`
+[`Hashmap`](Hashmap.md)<`K`, `V`\>
 
 ___
 
-### getRaw
+### isEmpty
 
-▸ **getRaw**(`key`): [`Cell`](Cell.md)
+▸ **isEmpty**(): `boolean`
+
+#### Returns
+
+`boolean`
+
+___
+
+### forEach
+
+▸ **forEach**(`callbackfn`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `key` | [`Bit`](../README.md#bit)[] |
+| `callbackfn` | (`key`: `K`, `value`: `V`) => `void` |
 
 #### Returns
 
-[`Cell`](Cell.md)
+`void`
 
 ___
 

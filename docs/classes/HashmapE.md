@@ -20,10 +20,17 @@
 ### Methods
 
 - [[iterator]](HashmapE.md#[iterator])
-- [set](HashmapE.md#set)
-- [setRaw](HashmapE.md#setraw)
 - [get](HashmapE.md#get)
-- [getRaw](HashmapE.md#getraw)
+- [has](HashmapE.md#has)
+- [set](HashmapE.md#set)
+- [add](HashmapE.md#add)
+- [replace](HashmapE.md#replace)
+- [getSet](HashmapE.md#getset)
+- [getAdd](HashmapE.md#getadd)
+- [getReplace](HashmapE.md#getreplace)
+- [delete](HashmapE.md#delete)
+- [isEmpty](HashmapE.md#isempty)
+- [forEach](HashmapE.md#foreach)
 - [cell](HashmapE.md#cell)
 - [parse](HashmapE.md#parse)
 
@@ -44,6 +51,46 @@
 #### Inherited from
 
 [Hashmap](Hashmap.md).[[iterator]](Hashmap.md#[iterator])
+
+___
+
+### get
+
+▸ **get**(`key`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+
+#### Returns
+
+`V`
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[get](Hashmap.md#get)
+
+___
+
+### has
+
+▸ **has**(`key`): `boolean`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+
+#### Returns
+
+`boolean`
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[has](Hashmap.md#has)
 
 ___
 
@@ -68,16 +115,16 @@ ___
 
 ___
 
-### setRaw
+### add
 
-▸ **setRaw**(`key`, `value`): [`HashmapE`](HashmapE.md)<`K`, `V`\>
+▸ **add**(`key`, `value`): [`HashmapE`](HashmapE.md)<`K`, `V`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `key` | [`Bit`](../README.md#bit)[] |
-| `value` | [`Cell`](Cell.md) |
+| `key` | `K` |
+| `value` | `V` |
 
 #### Returns
 
@@ -85,13 +132,97 @@ ___
 
 #### Inherited from
 
-[Hashmap](Hashmap.md).[setRaw](Hashmap.md#setraw)
+[Hashmap](Hashmap.md).[add](Hashmap.md#add)
 
 ___
 
-### get
+### replace
 
-▸ **get**(`key`): `V`
+▸ **replace**(`key`, `value`): [`HashmapE`](HashmapE.md)<`K`, `V`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+[`HashmapE`](HashmapE.md)<`K`, `V`\>
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[replace](Hashmap.md#replace)
+
+___
+
+### getSet
+
+▸ **getSet**(`key`, `value`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+`V`
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[getSet](Hashmap.md#getset)
+
+___
+
+### getAdd
+
+▸ **getAdd**(`key`, `value`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+`V`
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[getAdd](Hashmap.md#getadd)
+
+___
+
+### getReplace
+
+▸ **getReplace**(`key`, `value`): `V`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `K` |
+| `value` | `V` |
+
+#### Returns
+
+`V`
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[getReplace](Hashmap.md#getreplace)
+
+___
+
+### delete
+
+▸ **delete**(`key`): [`HashmapE`](HashmapE.md)<`K`, `V`\>
 
 #### Parameters
 
@@ -101,31 +232,45 @@ ___
 
 #### Returns
 
-`V`
+[`HashmapE`](HashmapE.md)<`K`, `V`\>
 
 #### Inherited from
 
-[Hashmap](Hashmap.md).[get](Hashmap.md#get)
+[Hashmap](Hashmap.md).[delete](Hashmap.md#delete)
 
 ___
 
-### getRaw
+### isEmpty
 
-▸ **getRaw**(`key`): [`Cell`](Cell.md)
+▸ **isEmpty**(): `boolean`
+
+#### Returns
+
+`boolean`
+
+#### Inherited from
+
+[Hashmap](Hashmap.md).[isEmpty](Hashmap.md#isempty)
+
+___
+
+### forEach
+
+▸ **forEach**(`callbackfn`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `key` | [`Bit`](../README.md#bit)[] |
+| `callbackfn` | (`key`: `K`, `value`: `V`) => `void` |
 
 #### Returns
 
-[`Cell`](Cell.md)
+`void`
 
 #### Inherited from
 
-[Hashmap](Hashmap.md).[getRaw](Hashmap.md#getraw)
+[Hashmap](Hashmap.md).[forEach](Hashmap.md#foreach)
 
 ___
 

@@ -16,6 +16,8 @@
 - [toBytesStandard](BOC.md#tobytesstandard)
 - [toBase64](BOC.md#tobase64)
 - [toBase64Standard](BOC.md#tobase64standard)
+- [toFiftHex](BOC.md#tofifthex)
+- [toFiftHexStandard](BOC.md#tofifthexstandard)
 - [toHex](BOC.md#tohex)
 - [toHexStandard](BOC.md#tohexstandard)
 
@@ -144,6 +146,46 @@ Returns serialized standard BOC in base64 representation.
 | :------ | :------ | :------ |
 | `cell` | [`Cell`](Cell.md) | Root cell. |
 | `options?` | [`BOCOptions`](../interfaces/BOCOptions.md) | - |
+
+#### Returns
+
+`string`
+
+___
+
+### toFiftHex
+
+▸ `Static` **toFiftHex**(`cells`): `string`
+
+Returns serialized BOC in Fift HEX representation.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cells` | [`Cell`](Cell.md)[] | Root cells. |
+
+#### Returns
+
+`string`
+
+___
+
+### toFiftHexStandard
+
+▸ `Static` **toFiftHexStandard**(`cell`): `string`
+
+Returns serialized standard BOC in Fift HEX representation.
+
+**`static`**
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cell` | [`Cell`](Cell.md) | Root cell. |
 
 #### Returns
 

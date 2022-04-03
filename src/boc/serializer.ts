@@ -4,6 +4,7 @@ import { Cell } from './cell'
 import { Builder } from './builder'
 import { Slice } from './slice'
 import {
+    hexToBits,
     hexToBytes,
     bytesToUint,
     bytesCompare,
@@ -49,6 +50,11 @@ interface CellNode {
     scanned: number
 }
 
+interface BuilderNode {
+    builder: Builder
+    indent: number
+}
+
 interface CellPointer {
     cell: Cell
     refIndexes: number[]
@@ -59,54 +65,61 @@ interface CellData {
     remainder: number[]
 }
 
-// const deserializeFift = (data: string): Cell[] => {
-//     if (!data) {
-//         throw new Error('Can\'t deserialize. Empty fift hex.')
-//     }
+const deserializeFift = (data: string): Cell[] => {
+    if (!data) {
+        throw new Error('Can\'t deserialize. Empty fift hex.')
+    }
 
-//     const re = /((\s*)x{([0-9a-zA-Z_]+)}\n?)/gmi
-//     const matches = [ ...data.matchAll(re) ] || []
+    const re = /((\s*)x{([0-9a-zA-Z_]+)}\n?)/gmi
+    const matches = [ ...data.matchAll(re) ] || []
 
-//     if (!matches.length) {
-//         throw new Error('Can\'t deserialize. Bad fift hex.')
-//     }
+    if (!matches.length) {
+        throw new Error('Can\'t deserialize. Bad fift hex.')
+    }
 
-//     const parseFiftHex = (fift: string): Bit[] => {
-//         const bits = fift
-//             .split('')
-//             .map(el => (el === '_' ? el : hexToBits(el).join('')))
-//             .join('')
-//             .replace(/1[0]*_$/, '')
-//             .split('')
-//             .map(parseInt)
+    const parseFiftHex = (fift: string): Bit[] => {
+        const bits = fift
+            .split('')
+            .map(el => (el === '_' ? el : hexToBits(el).join('')))
+            .join('')
+            .replace(/1[0]*_$/, '')
+            .split('')
+            .map(b => parseInt(b, 10) as Bit)
 
-//         return bits as Bit[]
-//     }
+        return bits
+    }
 
-//     const tree = new Builder()
-//     const stack: [ number, Builder ][] = [ [ 0, tree ] ]
-//     const parsed = matches.map((el) => {
-//         const [ , , indent, fift ] = el
-//         const bits = parseFiftHex(fift)
-//         const cell = new Builder()
-//             .storeBits(bits)
+    const isLastNested = (stack: BuilderNode[], indent: number): boolean => {
+        const lastStackIndent = stack[stack.length - 1].indent
 
-//         return { indent: indent.length, cell }
-//     })
+        return lastStackIndent !== 0 && lastStackIndent >= indent
+    }
 
-//     parsed.forEach((el) => {
-//         while (stack.length && stack[stack.length - 1][0] >= el.indent) {
-//             stack.pop()
-//         }
+    const stack = matches.reduce((acc, el, i) => {
+        const [ , , spaces, fift ] = el
+        const isLast = i === matches.length - 1
+        const indent = spaces.length
+        const bits = parseFiftHex(fift)
+        const builder = new Builder()
+            .storeBits(bits)
 
-//         const parent = stack.length ? stack[stack.length - 1][1] : tree
+        while (acc.length && isLastNested(acc, indent)) {
+            const { builder: b } = acc.pop()
 
-//         parent.refs.push(el.cell)
-//         stack.push([ el.indent, el.cell ])
-//     })
+            acc[acc.length - 1].builder.storeRef(b.cell())
+        }
 
-//     return tree.refs
-// }
+        if (isLast) {
+            acc[acc.length - 1].builder.storeRef(builder.cell())
+        } else {
+            acc.push({ indent, builder })
+        }
+
+        return acc
+    }, [] as BuilderNode[])
+
+    return stack.map(el => el.builder.cell())
+}
 
 const deserializeHeader = (bytes: number[]): BocHeader => {
     if (bytes.length < 4 + 1) {
@@ -475,6 +488,6 @@ const serialize = (root: Cell[], options: BOCOptions = {}): Uint8Array => {
 export {
     serialize,
     deserialize,
-    // deserializeFift,
+    deserializeFift,
     BOCOptions
 }

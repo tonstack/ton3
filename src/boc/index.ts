@@ -14,6 +14,7 @@ import {
 import {
     serialize,
     deserialize,
+    deserializeFift,
     BOCOptions
 } from './serializer'
 
@@ -53,12 +54,18 @@ class BOC {
             return deserialize(data as Uint8Array)
         }
 
-        if (BOC.isHex(data)) {
-            return deserialize(hexToBytes(data as string))
+        const value = (data as string).trim()
+
+        if (BOC.isFift(value)) {
+            return deserializeFift(value)
         }
 
-        if (BOC.isBase64(data)) {
-            return deserialize(base64ToBytes(data as string))
+        if (BOC.isHex(value)) {
+            return deserialize(hexToBytes(value))
+        }
+
+        if (BOC.isBase64(value)) {
+            return deserialize(base64ToBytes(value))
         }
 
         throw new Error('BOC: can\'t deserialize. Bad data.')
@@ -133,6 +140,32 @@ class BOC {
      */
     public static toBase64Standard (cell: Cell, options?: BOCOptions): string {
         return BOC.toBase64([ cell ], options)
+    }
+
+    /**
+     * Returns serialized BOC in Fift HEX representation.
+     *
+     * @static
+     * @param {Cell[]} cells - Root cells.
+     * @param {BOCOptions} [options]
+     * @return {string}
+     */
+    public static toFiftHex (cells: Cell[]): string {
+        const fift = cells.map(cell => cell.print())
+
+        return fift.join('\n')
+    }
+
+    /**
+     * Returns serialized standard BOC in Fift HEX representation.
+     *
+     * @static
+     * @param {Cell} cell - Root cell.
+     * @param {BOCOptions} [options]
+     * @return {string}
+     */
+    public static toFiftHexStandard (cell: Cell): string {
+        return BOC.toFiftHex([ cell ])
     }
 
     /**

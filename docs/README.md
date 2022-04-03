@@ -35,6 +35,7 @@
 
 ### Functions
 
+- [deserializeFift](README.md#deserializefift)
 - [deserialize](README.md#deserialize)
 - [serialize](README.md#serialize)
 - [augment](README.md#augment)
@@ -81,6 +82,22 @@ ___
 Ƭ **Bit**: ``1`` \| ``0``
 
 ## Functions
+
+### deserializeFift
+
+▸ **deserializeFift**(`data`): [`Cell`](classes/Cell.md)[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `data` | `string` |
+
+#### Returns
+
+[`Cell`](classes/Cell.md)[]
+
+___
 
 ### deserialize
 

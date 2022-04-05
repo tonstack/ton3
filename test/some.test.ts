@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { Mnemonic } from '../src/wallet'
+import { Mnemonic } from '../src/crypto/mnemonic'
 import { BOC, Builder } from '../src/boc'
 import { HighloadWalletV2Contract } from '../src/contracts'
 import { Address } from '../src/address'
@@ -7,21 +7,19 @@ import { Coins } from '../src/coins'
 
 describe('Some', () => {
     it('transfer walletv3', () => {
-        const access = new Mnemonic()
+        const words = [
+            'maple', 'accident', 'hand',
+            'own', 'range', 'turtle',
+            'push', 'scene', 'very',
+            'aisle', 'jelly', 'pride',
+            'sorry', 'action', 'planet',
+            'short', 'order', 'affair',
+            'doll', 'between', 'enjoy',
+            'arctic', 'muffin', 'thunder'
+        ]
+        const mnemonic = new Mnemonic(words)
+        const myWallet = new HighloadWalletV2Contract(0, 30, mnemonic.keys)
 
-        access.setMnemonic([
-            'amateur', 'force', 'share',
-            'evil', 'switch', 'marine',
-            'burden', 'bachelor', 'lumber',
-            'vital', 'brick', 'tiny',
-            'crop', 'mosquito', 'air',
-            'expire', 'exercise', 'weasel',
-            'void', 'spin', 'veteran',
-            'jar', 'whale', 'rice'
-        ])
-        access.generate()
-
-        const myWallet = new HighloadWalletV2Contract(0, 30, access.thisKeyPair)
         for (let i: number = 0; i < 1; i += 1) {
             myWallet.addTransfers([
                 {

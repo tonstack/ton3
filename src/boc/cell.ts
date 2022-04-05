@@ -4,7 +4,7 @@ import {
     hexToBits
 } from '../utils/helpers'
 import { augment } from '../utils/bits'
-import { hash } from '../utils/crypto'
+import { sha256 } from '../utils/hash'
 
 class Cell {
     private _bits: Bit[]
@@ -105,7 +105,7 @@ class Cell {
     public hash (): string {
         const bytes = bitsToBytes(this.representation)
 
-        return hash(bytes, 'sha256')
+        return sha256(bytes)
     }
 
     public print (indent: string = ''): string {

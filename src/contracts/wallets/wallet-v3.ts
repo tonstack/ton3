@@ -1,15 +1,15 @@
 import { Builder } from '../../boc/builder'
 import { Cell, BOC } from '../../boc'
+import { KeyPair } from '../../crypto/mnemonic'
 import { MsgTemplate } from '../msg-template'
 import { Address } from '../../address'
-import { KeyPairStruct } from '../../wallet/mnemonic'
 import { Wallet, WalletTransfer } from './wallet'
 
 class WalletV3Contract extends Wallet {
     constructor (
         workchain: number,
         subWalletID: number,
-        keyPair: KeyPairStruct
+        keyPair: KeyPair
     ) {
         super()
         this.errors = { transfersOverflow: 'transfersOverflow: WalletV3 transfers must be <= 4' }
@@ -27,7 +27,7 @@ class WalletV3Contract extends Wallet {
             data: new Builder() // init storage
                 .storeUint(0, 32)
                 .storeUint(this._subWalletID, 32)
-                .storeBytes(keyPair.publicKey)
+                .storeBytes(keyPair.public)
                 .cell()
         })
 

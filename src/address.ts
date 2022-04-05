@@ -1,4 +1,4 @@
-import { crc16BytesBe } from './utils/crypto'
+import { crc16BytesBe } from './utils/checksum'
 import {
     uint8toInt8,
     int8ToUint8,

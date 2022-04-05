@@ -1,10 +1,10 @@
+import nacl from 'tweetnacl'
 import { Coins } from '../../coins'
 import { Slice } from '../../boc/slice'
-import { KeyPairStruct } from '../../wallet/mnemonic'
 import { Builder, Cell } from '../../boc'
 import { Address } from '../../address'
 import { hexToBytes } from '../../utils/helpers'
-import { nacl } from '../../utils/crypto'
+import type { KeyPair } from '../../crypto/mnemonic'
 
 interface WalletTransfer {
     destination: Address
@@ -20,7 +20,7 @@ class Wallet {
 
     protected _subWalletID: number
 
-    protected _keyPair: KeyPairStruct
+    protected _keyPair: KeyPair
 
     protected _code: Cell
 
@@ -35,7 +35,7 @@ class Wallet {
         return this._subWalletID
     }
 
-    public get keyPair (): KeyPairStruct {
+    public get keyPair (): KeyPair {
         return this._keyPair
     }
 
@@ -63,7 +63,7 @@ class Wallet {
     protected signMsg (cell: Cell): Uint8Array {
         return nacl.sign.detached(
             hexToBytes(cell.hash()),
-            this._keyPair.privateKey.full
+            this._keyPair.private
         )
     }
 

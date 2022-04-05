@@ -1,19 +1,17 @@
 import { expect } from 'chai'
 import { bytesToHex } from '../src/utils/helpers'
-import { Mnemonic } from '../src/wallet'
+import { Mnemonic } from '../src/crypto/mnemonic'
 
 describe('Mnemonic', () => {
     it('Mnemonic simple generation', () => {
-        const myKey = new Mnemonic()
-        myKey.setPassphrase('aboba228')
-        myKey.generate()
+        const mnemonic = new Mnemonic([], 'aboba228')
 
-        console.log(myKey.thisMnemonic)
+        console.log(mnemonic.words)
         console.log()
-        console.log(`publicKey:       ${bytesToHex(myKey.thisKeyPair.publicKey)}`)
+        console.log(`publicKey:       ${bytesToHex(mnemonic.keys.public)}`)
         console.log()
-        console.log(`privateKey.full: ${bytesToHex(myKey.thisKeyPair.privateKey.full)}`)
-        console.log(`privateKey.seed: ${bytesToHex(myKey.thisKeyPair.privateKey.seed)}`)
+        console.log(`privateKey: ${bytesToHex(mnemonic.keys.private)}`)
+        console.log(`seed: ${bytesToHex(mnemonic.seed)}`)
 
         expect(1).to.equal(1)
     })

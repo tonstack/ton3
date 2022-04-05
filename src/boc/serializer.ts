@@ -15,7 +15,7 @@ import {
     augment,
     rollback
 } from '../utils/bits'
-import { crc32cBytesLe } from '../utils/crypto'
+import { crc32cBytesLe } from '../utils/checksum'
 
 const REACH_BOC_MAGIC_PREFIX = hexToBytes('B5EE9C72')
 const LEAN_BOC_MAGIC_PREFIX = hexToBytes('68FF65F3')

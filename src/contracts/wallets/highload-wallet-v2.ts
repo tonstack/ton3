@@ -1,8 +1,8 @@
 import { Builder } from '../../boc/builder'
 import { Cell, BOC } from '../../boc'
 import { MsgTemplate } from '../msg-template'
+import { KeyPair } from '../../crypto/mnemonic'
 import { Address } from '../../address'
-import { KeyPairStruct } from '../../wallet/mnemonic'
 import { Wallet, WalletTransfer } from './wallet'
 import { HashmapE } from '../../boc/hashmap'
 
@@ -10,7 +10,7 @@ class HighloadWalletV2Contract extends Wallet {
     constructor (
         workchain: number,
         subWalletID: number,
-        keyPair: KeyPairStruct
+        keyPair: KeyPair
     ) {
         super()
         this.errors = { transfersOverflow: 'transfersOverflow: HighloadWalletV2 transfers must be <= 100' }
@@ -25,7 +25,7 @@ class HighloadWalletV2Contract extends Wallet {
         const initStorage = new Builder()
             .storeUint(this.subWalletID, 32) //     stored_subwallet
             .storeUint(0, 64) //                    last_cleaned
-            .storeBytes(keyPair.publicKey) //       public_key
+            .storeBytes(this._keyPair.public) //       public_key
             .storeDict(new HashmapE(16)) //           old_queries
             .cell()
 

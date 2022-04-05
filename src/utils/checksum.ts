@@ -1,12 +1,3 @@
-import nacl from 'tweetnacl'
-import sha256 from 'crypto-js/sha256'
-import sha512 from 'crypto-js/sha512'
-import pbkdf2 from 'crypto-js/pbkdf2'
-import { algo } from 'crypto-js'
-import encoderHex from 'crypto-js/enc-hex'
-import * as bip0039en from './bip-0039-en.json'
-import { bytesToHex } from './helpers'
-
 const crc16 = (data: Uint8Array | number[]): number => {
     const POLY = 0x1021
     const bytes = new Uint8Array(data)
@@ -63,22 +54,7 @@ const crc32cBytesLe = (data: Uint8Array | number[]): Uint8Array => {
     return new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
 }
 
-const hash = (bytes: Uint8Array, type: 'sha256' | 'sha512'): string => {
-    const hex = bytesToHex(bytes)
-    const words = encoderHex.parse(hex)
-    const result = type === 'sha256'
-        ? sha256(words).toString()
-        : sha512(words).toString()
-
-    return result
-}
-
 export {
-    nacl,
-    algo,
-    hash,
-    pbkdf2,
     crc16BytesBe,
-    crc32cBytesLe,
-    bip0039en
+    crc32cBytesLe
 }

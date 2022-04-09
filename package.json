@@ -1,0 +1,36 @@
+{
+  "name": "ton3",
+  "version": "0.0.1",
+  "description": "TON Blockchain low-level API tools",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonstack/ton3.git"
+  },
+  "keywords": [
+    "ton",
+    "boc",
+    "cell",
+    "api",
+    "adnl",
+    "liteserver",
+    "blockchain"
+  ],
+  "author": "TonStack",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tonstack/ton3/issues"
+  },
+  "homepage": "https://github.com/tonstack/ton3#readme",
+  "dependencies": {
+    "ton3-core": "0.0.6",
+    "ton3-providers": "0.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.23",
+    "typescript": "^4.6.3"
+  }
+}

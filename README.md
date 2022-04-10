@@ -17,7 +17,8 @@ import { Wallets } from 'ton3-contracts'
 
 const highloadWalletExample = async () => {
     const endpoint = 'https://testnet.toncenter.com/api/v2'
-    const provider = new Providers.ProviderJSONRPCV2(endpoint)
+    const apiKey = 'xxx'
+    const provider = new Providers.ProviderRESTV2(endpoint, { apiKey })
     const client = await provider.client()
 
     const mnemonic = new Mnemonic()

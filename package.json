@@ -1,6 +1,6 @@
 {
   "name": "ton3",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "TON Blockchain low-level API tools",
   "main": "./dist/index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "api",
     "adnl",
     "liteserver",
+    "liteclient",
     "blockchain"
   ],
   "author": "TonStack",
@@ -26,7 +27,7 @@
   },
   "homepage": "https://github.com/tonstack/ton3#readme",
   "dependencies": {
-    "ton3-core": "0.0.6",
+    "ton3-core": "0.0.7",
     "ton3-providers": "0.0.6"
   },
   "devDependencies": {

@@ -28,7 +28,7 @@
   "homepage": "https://github.com/tonstack/ton3#readme",
   "dependencies": {
     "ton3-core": "0.0.12",
-    "ton3-providers": "0.0.8"
+    "ton3-providers": "0.0.9"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",

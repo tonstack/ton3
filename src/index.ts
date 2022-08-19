@@ -1,31 +1,24 @@
-import {
-    Bit,
-    BOC,
-    Cell,
-    Slice,
-    Builder,
-    Hashmap,
-    HashmapE,
-    Mnemonic,
-    Contracts,
-    Address,
-    Coins,
-    Utils
-} from 'ton3-core'
-import * as Providers from 'ton3-providers'
-
 export {
     Bit,
     BOC,
+    BOCOptions,
     Cell,
+    CellType,
+    CellOptions,
     Slice,
     Builder,
     Hashmap,
     HashmapE,
     Mnemonic,
+    MnemonicBIP39,
+    MnemonicOptions,
+    KeyPair,
     Contracts,
     Address,
+    AddressRewriteOptions,
+    AddressStringifyOptions,
     Coins,
-    Utils,
-    Providers
-}
+    Utils
+} from 'ton3-core'
+
+export * as Providers from 'ton3-providers'

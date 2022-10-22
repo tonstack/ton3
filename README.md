@@ -10,6 +10,9 @@ ton3 is a javascript package inspired by [tonweb](https://github.com/toncenter/t
 npm i ton3
 ```
 
+## Documentation
+Visit [ton3-core](https://github.com/tonstack/ton3-core/docs/) to see API reference.
+
 ## Simple usage
 ```typescript
 import { Providers, Mnemonic, Address, Coins, Builder, BOC } from 'ton3'

@@ -13,6 +13,10 @@ npm i ton3
 ## Simple usage
 ```typescript
 import { Providers, Mnemonic, Address, Coins, Builder, BOC } from 'ton3'
+/* Alternatively you can use standalone packages
+ * import { Mnemonic, Address, Coins, Builder, BOC } from 'ton3-core'
+ * import { ProviderRESTV2 } from 'ton3-providers'
+*/
 import { Wallets } from 'ton3-contracts'
 
 const highloadWalletExample = async () => {
@@ -22,7 +26,7 @@ const highloadWalletExample = async () => {
     const client = await provider.client()
 
     const mnemonic = new Mnemonic()
-    const highload = new Wallets.ContractHighloadWalletV2(0, mnemonic.keys.public)
+    const highload = new Wallets.ContractHighloadWalletV2({ workchain: 0, publicKey: mnemonic.keys.public })
 
     console.log(mnemonic.words) // Get mnemonic phrase
     console.log(highload.address.toString()) // Get contract address

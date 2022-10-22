@@ -11,7 +11,7 @@ npm i ton3
 ```
 
 ## Documentation
-Visit [ton3-core](https://github.com/tonstack/ton3-core/docs/) to see API reference.
+Visit [ton3-core](https://github.com/tonstack/ton3-core/tree/main/docs) to see API reference.
 
 ## Simple usage
 ```typescript

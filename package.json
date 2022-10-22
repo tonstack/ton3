@@ -1,6 +1,6 @@
 {
   "name": "ton3",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "TON Blockchain low-level API tools",
   "main": "./dist/index.js",
   "scripts": {

@@ -2,13 +2,18 @@
 
 [![npm](https://img.shields.io/npm/v/ton3)](https://www.npmjs.com/package/ton3) ![GitHub top language](https://img.shields.io/github/languages/top/tonstack/ton3) [![TON](https://img.shields.io/badge/based%20on-The%20Open%20Network-blue)](https://ton.org/)
 
-ton3 is a javascript package inspired by [tonweb](https://github.com/toncenter/tonweb) to work with [TON blockchain](https://ton.org).\
+ton3 is a javascript package inspired by [tonweb](https://github.com/toncenter/tonweb) to work with [TON blockchain](https://ton.org).
 > :warning: Work in progress, API can (and most likely will) be changed! This is not production ready version yet.
 
 ## How to install
 ```
 npm i ton3
 ```
+
+## Standalone packages
+- [ton3-core](https://github.com/tonstack/ton3-core)
+- [ton3-contracts](https://github.com/tonstack/ton3-contracts)
+- [ton3-providers](https://github.com/tonstack/ton3-providers)
 
 ## Documentation
 Visit [ton3-core](https://github.com/tonstack/ton3-core/tree/main/docs) to see API reference.

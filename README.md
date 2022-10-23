@@ -63,6 +63,12 @@ const highloadWalletExample = async () => {
 }
 ```
 
+## Donations
+You can support library author by sending any amount of TON to address below
+```
+UQCcJpog-XAzY7tK6uqCd6QrEBlgocPXdXgIG3ev1Dxg5dl2
+```
+
 ## License
 
 MIT License
